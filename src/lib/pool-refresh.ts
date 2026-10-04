@@ -80,19 +80,28 @@ export async function refreshCandidatePool(): Promise<PoolRefreshResult> {
   return { picks, master: MASTER_UNIVERSE.length, fetched, qualified: qualified.length, durationMs: Date.now() - t0, sectorMix };
 }
 
-/** 將重選結果寫入 Supabase（先 upsert 再清掉舊名單外的） */
+/** 將重選結果寫入 Supabase（先 upsert 再清掉舊名單外的），同時寫入 pool_history 供週報 */
 export async function savePoolToSupabase(picks: PoolPick[]): Promise<{ saved: boolean; note?: string }> {
   const supa = getSupabaseAdmin();
   if (!supa) return { saved: false, note: '未設定 SUPABASE_SERVICE_ROLE_KEY' };
+  const now = new Date().toISOString();
+  const weekStart = new Date().toLocaleDateString('en-CA', { timeZone: 'America/New_York' }); // ET 當天
   const rows = picks.map((p) => ({
     symbol: p.symbol, name: p.name, sector: p.sector, rank: p.rank,
-    avg_dollar_vol_m: p.avgDollarVolM, updated_at: new Date().toISOString(),
+    avg_dollar_vol_m: p.avgDollarVolM, updated_at: now,
   }));
   const { error: upErr } = await supa.from('candidate_pool').upsert(rows, { onConflict: 'symbol' });
   if (upErr) return { saved: false, note: `upsert 失敗：${upErr.message}` };
   const syms = picks.map((p) => p.symbol);
   const { error: delErr } = await supa.from('candidate_pool').delete().not('symbol', 'in', `(${syms.join(',')})`);
   if (delErr) return { saved: false, note: `清理舊名單失敗：${delErr.message}` };
+  // 歷史快照（同一天重跑會覆蓋當天快照）
+  const histRows = picks.map((p) => ({
+    week_start: weekStart, symbol: p.symbol, name: p.name, sector: p.sector,
+    rank: p.rank, avg_dollar_vol_m: p.avgDollarVolM,
+  }));
+  const { error: histErr } = await supa.from('pool_history').upsert(histRows, { onConflict: 'week_start,symbol' });
+  if (histErr) return { saved: false, note: `歷史寫入失敗：${histErr.message}` };
   return { saved: true };
 }
 

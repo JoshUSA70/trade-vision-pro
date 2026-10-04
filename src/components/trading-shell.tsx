@@ -1,10 +1,11 @@
 import { Link, useRouterState } from '@tanstack/react-router';
-import { Activity, ArrowDownRight, ArrowUpRight, BarChart3, BookOpen, CircleHelp, Command, LayoutDashboard, Search, ShieldCheck } from 'lucide-react';
+import { Activity, ArrowDownRight, ArrowUpRight, BarChart3, BookOpen, CircleHelp, Command, Layers, LayoutDashboard, Search, ShieldCheck } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 const links = [
   { to: '/' as const, label: '總覽儀表板', english: 'Dashboard', icon: LayoutDashboard },
   { to: '/scanner' as const, label: '股票掃描', english: 'Scanner', icon: Search },
+  { to: '/pool' as const, label: '股票池', english: 'Pool', icon: Layers },
   { to: '/journal' as const, label: '交易日誌', english: 'Journal', icon: BookOpen },
 ];
 
@@ -26,7 +27,7 @@ export function TradingShell({ children, live }: { children: ReactNode; live?: b
       <main className="mx-auto w-full max-w-[1580px] px-5 py-8 sm:px-7 md:px-10 md:py-9">{children}</main>
       <footer className="mx-auto flex w-full max-w-[1580px] flex-wrap items-center justify-between gap-2 px-5 pb-8 text-[11px] text-subtle sm:px-7 md:px-10"><span>© 2026 JoshQuantTrader Pro</span><span className="flex items-center gap-1.5"><ShieldCheck size={13}/> 僅供研究參考，不構成投資建議</span></footer>
     </div>
-    <nav className="mobile-nav fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 border-t border-border bg-sidebar" aria-label="手機選單">{links.map(({to,label,icon:Icon}) => <Link key={to} to={to} className={`flex flex-col items-center justify-center gap-1 py-2 text-[10px] ${pathname === to ? 'text-primary' : 'text-muted-foreground'}`}><Icon size={19}/>{label}</Link>)}</nav>
+    <nav className="mobile-nav fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-border bg-sidebar" aria-label="手機選單">{links.map(({to,label,icon:Icon}) => <Link key={to} to={to} className={`flex flex-col items-center justify-center gap-1 py-2 text-[10px] ${pathname === to ? 'text-primary' : 'text-muted-foreground'}`}><Icon size={19}/>{label}</Link>)}</nav>
   </div>;
 }
 

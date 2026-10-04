@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as PoolRouteImport } from './routes/pool'
 import { Route as ScannerRouteImport } from './routes/scanner'
 import { Route as ApiAlpacaJournalRouteImport } from './routes/api/alpaca-journal'
 import { Route as ApiAlpacaPositionsRouteImport } from './routes/api/alpaca-positions'
 import { Route as ApiOrderRouteImport } from './routes/api/order'
+import { Route as ApiPoolRouteImport } from './routes/api/pool'
 import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-history'
 import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
@@ -23,6 +25,7 @@ import { Route as ApiCronDailyScanRouteImport } from './routes/api/cron/daily-sc
 import { Route as ApiCronHistoryRouteImport } from './routes/api/cron/history'
 import { Route as ApiCronTestRouteImport } from './routes/api/cron/test'
 import { Route as ApiCronWeeklyPoolRouteImport } from './routes/api/cron/weekly-pool'
+import { Route as ApiPoolHistoryRouteImport } from './routes/api/pool/history'
 import { Route as ApiSupabaseStatusRouteImport } from './routes/api/supabase/status'
 import { Route as ApiTelegramTestRouteImport } from './routes/api/telegram/test'
 
@@ -34,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const JournalRoute = JournalRouteImport.update({
   id: '/journal',
   path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoolRoute = PoolRouteImport.update({
+  id: '/pool',
+  path: '/pool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ScannerRoute = ScannerRouteImport.update({
@@ -54,6 +62,11 @@ const ApiAlpacaPositionsRoute = ApiAlpacaPositionsRouteImport.update({
 const ApiOrderRoute = ApiOrderRouteImport.update({
   id: '/api/order',
   path: '/api/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPoolRoute = ApiPoolRouteImport.update({
+  id: '/api/pool',
+  path: '/api/pool',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPortfolioHistoryRoute = ApiPortfolioHistoryRouteImport.update({
@@ -96,6 +109,11 @@ const ApiCronWeeklyPoolRoute = ApiCronWeeklyPoolRouteImport.update({
   path: '/api/cron/weekly-pool',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPoolHistoryRoute = ApiPoolHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => ApiPoolRoute,
+} as any)
 const ApiSupabaseStatusRoute = ApiSupabaseStatusRouteImport.update({
   id: '/api/supabase/status',
   path: '/api/supabase/status',
@@ -110,10 +128,12 @@ const ApiTelegramTestRoute = ApiTelegramTestRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
   '/api/order': typeof ApiOrderRoute
+  '/api/pool': typeof ApiPoolRouteWithChildren
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
@@ -122,16 +142,19 @@ export interface FileRoutesByFullPath {
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
   '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
   '/api/order': typeof ApiOrderRoute
+  '/api/pool': typeof ApiPoolRouteWithChildren
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
@@ -140,6 +163,7 @@ export interface FileRoutesByTo {
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
   '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
@@ -147,10 +171,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
   '/api/order': typeof ApiOrderRoute
+  '/api/pool': typeof ApiPoolRouteWithChildren
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
@@ -159,6 +185,7 @@ export interface FileRoutesById {
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
   '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
@@ -167,10 +194,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/journal'
+    | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
     | '/api/order'
+    | '/api/pool'
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
@@ -179,16 +208,19 @@ export interface FileRouteTypes {
     | '/api/cron/history'
     | '/api/cron/test'
     | '/api/cron/weekly-pool'
+    | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/journal'
+    | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
     | '/api/order'
+    | '/api/pool'
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
@@ -197,16 +229,19 @@ export interface FileRouteTypes {
     | '/api/cron/history'
     | '/api/cron/test'
     | '/api/cron/weekly-pool'
+    | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
   id:
     | '__root__'
     | '/'
     | '/journal'
+    | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
     | '/api/order'
+    | '/api/pool'
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
@@ -215,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/cron/history'
     | '/api/cron/test'
     | '/api/cron/weekly-pool'
+    | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
   fileRoutesById: FileRoutesById
@@ -222,10 +258,12 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JournalRoute: typeof JournalRoute
+  PoolRoute: typeof PoolRoute
   ScannerRoute: typeof ScannerRoute
   ApiAlpacaJournalRoute: typeof ApiAlpacaJournalRoute
   ApiAlpacaPositionsRoute: typeof ApiAlpacaPositionsRoute
   ApiOrderRoute: typeof ApiOrderRoute
+  ApiPoolRoute: typeof ApiPoolRouteWithChildren
   ApiPortfolioHistoryRoute: typeof ApiPortfolioHistoryRoute
   ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
@@ -254,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pool': {
+      id: '/pool'
+      path: '/pool'
+      fullPath: '/pool'
+      preLoaderRoute: typeof PoolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scanner': {
       id: '/scanner'
       path: '/scanner'
@@ -280,6 +325,13 @@ declare module '@tanstack/react-router' {
       path: '/api/order'
       fullPath: '/api/order'
       preLoaderRoute: typeof ApiOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/pool': {
+      id: '/api/pool'
+      path: '/api/pool'
+      fullPath: '/api/pool'
+      preLoaderRoute: typeof ApiPoolRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/portfolio-history': {
@@ -338,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronWeeklyPoolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pool/history': {
+      id: '/api/pool/history'
+      path: '/history'
+      fullPath: '/api/pool/history'
+      preLoaderRoute: typeof ApiPoolHistoryRouteImport
+      parentRoute: typeof ApiPoolRoute
+    }
     '/api/supabase/status': {
       id: '/api/supabase/status'
       path: '/api/supabase/status'
@@ -355,13 +414,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ApiPoolRouteChildren {
+  ApiPoolHistoryRoute: typeof ApiPoolHistoryRoute
+}
+
+const ApiPoolRouteChildren: ApiPoolRouteChildren = {
+  ApiPoolHistoryRoute: ApiPoolHistoryRoute,
+}
+
+const ApiPoolRouteWithChildren =
+  ApiPoolRoute._addFileChildren(ApiPoolRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JournalRoute: JournalRoute,
+  PoolRoute: PoolRoute,
   ScannerRoute: ScannerRoute,
   ApiAlpacaJournalRoute: ApiAlpacaJournalRoute,
   ApiAlpacaPositionsRoute: ApiAlpacaPositionsRoute,
   ApiOrderRoute: ApiOrderRoute,
+  ApiPoolRoute: ApiPoolRouteWithChildren,
   ApiPortfolioHistoryRoute: ApiPortfolioHistoryRoute,
   ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
