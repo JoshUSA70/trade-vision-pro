@@ -133,6 +133,7 @@ export const Route = createFileRoute('/api/scan')({
             {
               source: 'error',
               error: err instanceof Error ? err.message : 'Finnhub 請求失敗',
+              keyConfigured: !!process.env['FINNHUB_KEY'],
               scanned_at: new Date().toISOString(),
               signals,
             },
