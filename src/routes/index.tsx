@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowRight, ArrowUpRight, BarChart3, BriefcaseBusiness, CircleDollarSign, Clock3, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
