@@ -64,16 +64,16 @@ function scoreFor(rsi: number): number {
   return Math.round(100 - Math.abs(50 - rsi) * 2);
 }
 
-async function fetchCloses(symbol: string, key: string): Promise<number[] | null> {
+async function fetchCloses(symbol: string, key: string): Promise<{ closes: number[] | null; status: number }> {
   const to = Math.floor(Date.now() / 1000);
   const from = to - 60 * 24 * 3600; // 近 60 天日線，足夠算 RSI(14)
   const res = await fetch(
-    `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${key}`,
+    `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${key.trim()}`,
   );
-  if (!res.ok) return null;
+  if (!res.ok) return { closes: null, status: res.status };
   const data = (await res.json()) as { s?: string; c?: number[] };
-  if (data.s !== 'ok' || !Array.isArray(data.c)) return null;
-  return data.c;
+  if (data.s !== 'ok' || !Array.isArray(data.c)) return { closes: null, status: res.status };
+  return { closes: data.c, status: res.status };
 }
 
 export const Route = createFileRoute('/api/scan')({
@@ -96,26 +96,33 @@ export const Route = createFileRoute('/api/scan')({
           );
         }
 
+        let statusHint = 'none';
         try {
           const results = await Promise.all(
             UNIVERSE.map(async (s) => {
-              const closes = await fetchCloses(s.symbol, key);
-              if (!closes || closes.length === 0) return null;
+              const { closes, status } = await fetchCloses(s.symbol, key);
+              if (!closes || closes.length === 0) return { status, data: null as null };
               const rsi = rsi14(closes);
-              if (rsi === null) return null;
+              if (rsi === null) return { status, data: null as null };
               const { signal, kind } = signalFor(rsi);
               return {
-                ...s,
-                price: Math.round(closes[closes.length - 1]! * 100) / 100,
-                rsi,
-                signal,
-                kind,
-                score: scoreFor(rsi),
+                status,
+                data: {
+                  ...s,
+                  price: Math.round(closes[closes.length - 1]! * 100) / 100,
+                  rsi,
+                  signal,
+                  kind,
+                  score: scoreFor(rsi),
+                },
               };
             }),
           );
-          const signals = results
-            .filter((r): r is NonNullable<typeof r> => r !== null)
+          const okResults = results.filter((r) => r.data !== null);
+          const statuses = results.map((r) => r.status);
+          statusHint = statuses.length ? [...new Set(statuses)].join(',') : 'none';
+          const signals = okResults
+            .map((r) => r.data!)
             .sort((a, b) => b.score - a.score)
             .slice(0, 10); // 只回傳訊號最強的前 10 檔
           if (signals.length === 0) throw new Error('Finnhub 沒有回傳可用數據');
@@ -134,6 +141,7 @@ export const Route = createFileRoute('/api/scan')({
               source: 'error',
               error: err instanceof Error ? err.message : 'Finnhub 請求失敗',
               keyConfigured: !!process.env['FINNHUB_KEY'],
+              finnhubStatus: statusHint,
               scanned_at: new Date().toISOString(),
               signals,
             },
