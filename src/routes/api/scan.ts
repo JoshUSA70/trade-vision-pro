@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-// S&P 100 成分股中流動性最高的代表名單（控制 API 呼叫量在 Finnhub 免費額度內）
+// S&P 100 成分股中流動性最高的代表名單
 const UNIVERSE = [
   { symbol: 'AAPL', name: 'Apple Inc.' },
   { symbol: 'NVDA', name: 'NVIDIA Corp.' },
@@ -64,16 +64,40 @@ function scoreFor(rsi: number): number {
   return Math.round(100 - Math.abs(50 - rsi) * 2);
 }
 
-async function fetchCloses(symbol: string, key: string): Promise<{ closes: number[] | null; status: number }> {
-  const to = Math.floor(Date.now() / 1000);
-  const from = to - 60 * 24 * 3600; // 近 60 天日線，足夠算 RSI(14)
-  const res = await fetch(
-    `https://finnhub.io/api/v1/stock/candle?symbol=${symbol}&resolution=D&from=${from}&to=${to}&token=${key.trim()}`,
-  );
-  if (!res.ok) return { closes: null, status: res.status };
-  const data = (await res.json()) as { s?: string; c?: number[] };
-  if (data.s !== 'ok' || !Array.isArray(data.c)) return { closes: null, status: res.status };
-  return { closes: data.c, status: res.status };
+type YahooChart = {
+  chart?: {
+    result?: Array<{ indicators?: { quote?: Array<{ close?: (number | null)[] }> } }>;
+    error?: unknown;
+  };
+};
+
+// Yahoo Finance 免費日線（免 key）。注意：非官方接口，失敗時退回示範資料。
+async function fetchCloses(symbol: string): Promise<number[] | null> {
+  const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
+  for (const host of hosts) {
+    try {
+      const res = await fetch(`https://${host}/v8/finance/chart/${symbol}?range=3mo&interval=1d`, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36' },
+      });
+      if (!res.ok) continue;
+      const data = (await res.json()) as YahooChart;
+      const raw = data.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
+      if (!Array.isArray(raw)) continue;
+      const closes = raw.filter((c): c is number => typeof c === 'number' && Number.isFinite(c));
+      if (closes.length >= 15) return closes;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+function demoSignals() {
+  return DEMO_FALLBACK.map((s) => {
+    const rsi = Math.round((30 + Math.random() * 40) * 10) / 10;
+    const { signal, kind } = signalFor(rsi);
+    return { ...s, rsi, signal, kind, score: scoreFor(rsi) };
+  });
 }
 
 export const Route = createFileRoute('/api/scan')({
@@ -81,69 +105,40 @@ export const Route = createFileRoute('/api/scan')({
     handlers: {
       GET: async () => {
         const headers = { 'Cache-Control': 'no-store' };
-        const key = process.env['FINNHUB_KEY'];
-
-        // 未設定金鑰 → 回傳示範資料，網站不會掛掉
-        if (!key) {
-          const signals = DEMO_FALLBACK.map((s) => {
-            const rsi = Math.round((30 + Math.random() * 40) * 10) / 10;
-            const { signal, kind } = signalFor(rsi);
-            return { ...s, rsi, signal, kind, score: scoreFor(rsi) };
-          });
-          return Response.json(
-            { source: 'demo', notice: '請在環境變數設定 FINNHUB_KEY', scanned_at: new Date().toISOString(), signals },
-            { headers },
-          );
-        }
-
-        let statusHint = 'none';
         try {
           const results = await Promise.all(
             UNIVERSE.map(async (s) => {
-              const { closes, status } = await fetchCloses(s.symbol, key);
-              if (!closes || closes.length === 0) return { status, data: null as null };
+              const closes = await fetchCloses(s.symbol);
+              if (!closes || closes.length === 0) return null;
               const rsi = rsi14(closes);
-              if (rsi === null) return { status, data: null as null };
+              if (rsi === null) return null;
               const { signal, kind } = signalFor(rsi);
               return {
-                status,
-                data: {
-                  ...s,
-                  price: Math.round(closes[closes.length - 1]! * 100) / 100,
-                  rsi,
-                  signal,
-                  kind,
-                  score: scoreFor(rsi),
-                },
+                ...s,
+                price: Math.round(closes[closes.length - 1]! * 100) / 100,
+                rsi,
+                signal,
+                kind,
+                score: scoreFor(rsi),
               };
             }),
           );
-          const okResults = results.filter((r) => r.data !== null);
-          const statuses = results.map((r) => r.status);
-          statusHint = statuses.length ? [...new Set(statuses)].join(',') : 'none';
-          const signals = okResults
-            .map((r) => r.data!)
+          const signals = results
+            .filter((r): r is NonNullable<typeof r> => r !== null)
             .sort((a, b) => b.score - a.score)
             .slice(0, 10); // 只回傳訊號最強的前 10 檔
-          if (signals.length === 0) throw new Error('Finnhub 沒有回傳可用數據');
+          if (signals.length === 0) throw new Error('市場數據暫時無法取得');
           return Response.json(
-            { source: 'finnhub', scanned_at: new Date().toISOString(), signals },
+            { source: 'yahoo', scanned_at: new Date().toISOString(), signals },
             { headers },
           );
         } catch (err) {
-          const signals = DEMO_FALLBACK.map((s) => {
-            const rsi = Math.round((30 + Math.random() * 40) * 10) / 10;
-            const { signal, kind } = signalFor(rsi);
-            return { ...s, rsi, signal, kind, score: scoreFor(rsi) };
-          });
           return Response.json(
             {
               source: 'error',
-              error: err instanceof Error ? err.message : 'Finnhub 請求失敗',
-              keyConfigured: !!process.env['FINNHUB_KEY'],
-              finnhubStatus: statusHint,
+              error: err instanceof Error ? err.message : '掃描請求失敗',
               scanned_at: new Date().toISOString(),
-              signals,
+              signals: demoSignals(),
             },
             { status: 502, headers },
           );
