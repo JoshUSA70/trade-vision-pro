@@ -21,7 +21,10 @@ export const Route = createFileRoute('/api/alpaca-positions')({
 
         // No keys configured yet → demo fixtures so the UI keeps working.
         if (!key || !secret) {
-          return Response.json({ source: 'demo', account: null, positions: demoPositions }, { headers });
+          return Response.json(
+            { source: 'demo', notice: '請在環境變數設定 ALPACA_API_KEY 與 ALPACA_SECRET_KEY', account: null, positions: demoPositions },
+            { headers },
+          );
         }
 
         try {
