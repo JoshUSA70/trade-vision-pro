@@ -18,6 +18,10 @@ import { Route as ApiOrderRouteImport } from './routes/api/order'
 import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-history'
 import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
+import { Route as ApiCronDailyScanRouteImport } from './routes/api/cron/daily-scan'
+import { Route as ApiCronHistoryRouteImport } from './routes/api/cron/history'
+import { Route as ApiCronTestRouteImport } from './routes/api/cron/test'
+import { Route as ApiTelegramTestRouteImport } from './routes/api/telegram/test'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +68,26 @@ const ApiScanRoute = ApiScanRouteImport.update({
   path: '/api/scan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronDailyScanRoute = ApiCronDailyScanRouteImport.update({
+  id: '/api/cron/daily-scan',
+  path: '/api/cron/daily-scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronHistoryRoute = ApiCronHistoryRouteImport.update({
+  id: '/api/cron/history',
+  path: '/api/cron/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronTestRoute = ApiCronTestRouteImport.update({
+  id: '/api/cron/test',
+  path: '/api/cron/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTelegramTestRoute = ApiTelegramTestRouteImport.update({
+  id: '/api/telegram/test',
+  path: '/api/telegram/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +99,10 @@ export interface FileRoutesByFullPath {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
+  '/api/cron/history': typeof ApiCronHistoryRoute
+  '/api/cron/test': typeof ApiCronTestRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +114,10 @@ export interface FileRoutesByTo {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
+  '/api/cron/history': typeof ApiCronHistoryRoute
+  '/api/cron/test': typeof ApiCronTestRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +130,10 @@ export interface FileRoutesById {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
+  '/api/cron/history': typeof ApiCronHistoryRoute
+  '/api/cron/test': typeof ApiCronTestRoute
+  '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +147,10 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/cron/daily-scan'
+    | '/api/cron/history'
+    | '/api/cron/test'
+    | '/api/telegram/test'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +162,10 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/cron/daily-scan'
+    | '/api/cron/history'
+    | '/api/cron/test'
+    | '/api/telegram/test'
   id:
     | '__root__'
     | '/'
@@ -133,6 +177,10 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/cron/daily-scan'
+    | '/api/cron/history'
+    | '/api/cron/test'
+    | '/api/telegram/test'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +193,10 @@ export interface RootRouteChildren {
   ApiPortfolioHistoryRoute: typeof ApiPortfolioHistoryRoute
   ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
+  ApiCronDailyScanRoute: typeof ApiCronDailyScanRoute
+  ApiCronHistoryRoute: typeof ApiCronHistoryRoute
+  ApiCronTestRoute: typeof ApiCronTestRoute
+  ApiTelegramTestRoute: typeof ApiTelegramTestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +264,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiScanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/daily-scan': {
+      id: '/api/cron/daily-scan'
+      path: '/api/cron/daily-scan'
+      fullPath: '/api/cron/daily-scan'
+      preLoaderRoute: typeof ApiCronDailyScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/history': {
+      id: '/api/cron/history'
+      path: '/api/cron/history'
+      fullPath: '/api/cron/history'
+      preLoaderRoute: typeof ApiCronHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/test': {
+      id: '/api/cron/test'
+      path: '/api/cron/test'
+      fullPath: '/api/cron/test'
+      preLoaderRoute: typeof ApiCronTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/telegram/test': {
+      id: '/api/telegram/test'
+      path: '/api/telegram/test'
+      fullPath: '/api/telegram/test'
+      preLoaderRoute: typeof ApiTelegramTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +305,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPortfolioHistoryRoute: ApiPortfolioHistoryRoute,
   ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
+  ApiCronDailyScanRoute: ApiCronDailyScanRoute,
+  ApiCronHistoryRoute: ApiCronHistoryRoute,
+  ApiCronTestRoute: ApiCronTestRoute,
+  ApiTelegramTestRoute: ApiTelegramTestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
