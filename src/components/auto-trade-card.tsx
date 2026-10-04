@@ -15,17 +15,17 @@ type Trade = {
   executed_at: string; auto: boolean;
 };
 
-// 下一次週一～週五 21:30（台灣時間，美股開盤）
+// 下一次週一～週五 22:45（台灣時間；美東夏令 10:45／冬令 9:45，開盤後第一根 15分K 確認完）
 function nextRunText(): string {
   const taipeiNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
   const cand = new Date(taipeiNow);
-  cand.setHours(21, 30, 0, 0);
+  cand.setHours(22, 45, 0, 0);
   const isWeekday = (d: Date) => d.getDay() >= 1 && d.getDay() <= 5;
   if (cand.getTime() <= taipeiNow.getTime() || !isWeekday(cand)) {
     do { cand.setDate(cand.getDate() + 1); } while (!isWeekday(cand));
   }
   const wd = ['日', '一', '二', '三', '四', '五', '六'][cand.getDay()];
-  return `${cand.getMonth() + 1}/${cand.getDate()}（${wd}）21:30`;
+  return `${cand.getMonth() + 1}/${cand.getDate()}（${wd}）22:45`;
 }
 
 export function AutoTradeCard() {
@@ -87,8 +87,8 @@ export function AutoTradeCard() {
       <div className="grid gap-6 px-6 py-5 lg:grid-cols-2">
         <div>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div><p className="text-[11px] text-muted-foreground">下次執行時間</p><p className="mt-1 text-sm font-semibold text-foreground">{nextRunText()}（美股開盤）</p></div>
-            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · 智能選股＋四因子評分 · Score≥75</p></div>
+            <div><p className="text-[11px] text-muted-foreground">下次執行時間</p><p className="mt-1 text-sm font-semibold text-foreground">{nextRunText()}（開盤15分K確認後）</p></div>
+            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · 智能選股＋四因子＋盤中15分K確認</p></div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={() => setConfirmOpen(true)} disabled={running} className="h-8 rounded-sm text-xs font-semibold">
@@ -123,7 +123,7 @@ export function AutoTradeCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認手動執行</AlertDialogTitle>
             <AlertDialogDescription>
-              將立即執行一次完整流程：智能選股（約 {CANDIDATE_POOL.length} 檔候選）→ 四因子評分 → 對 Score≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
+              將立即執行一次完整流程：智能選股（約 {CANDIDATE_POOL.length} 檔候選）→ 日線四因子評分 → 盤中 15分K 確認 → 對最終分數≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
