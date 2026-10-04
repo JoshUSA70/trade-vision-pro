@@ -18,6 +18,8 @@ export type AutoOrder = {
   score: number;
   rsi: number;
   volume_ratio: number;
+  trend: string;
+  macd_hist: number | null;
   orderId: string | null;
   status: string;
   logged: boolean;
@@ -100,7 +102,8 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
         });
         result.orders.push({
           symbol: s.symbol, price: s.price, score: s.score, rsi: s.rsi,
-          volume_ratio: s.volume_ratio, orderId: order.id, status: order.status, logged: log.logged,
+          volume_ratio: s.volume_ratio, trend: s.trend, macd_hist: s.macd_hist,
+          orderId: order.id, status: order.status, logged: log.logged,
         });
       } catch (e) {
         result.skipped.push({ symbol: s.symbol, reason: e instanceof Error ? e.message : '下單失敗' });
@@ -111,7 +114,7 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
     const date = todayTaipei();
     if (result.orders.length > 0) {
       const lines = result.orders.map(
-        (o) => `- ${o.symbol} @ $${o.price} (Score: ${o.score}, RSI: ${o.rsi}, Vol: ${o.volume_ratio}x)`,
+        (o) => `- ${o.symbol} @ $${o.price} (Score: ${o.score}, RSI: ${o.rsi}, Vol: ${o.volume_ratio}x, ${o.trend})`,
       );
       await sendTelegram(
         `🚀 *Trade Vision 每日自動報告 - ${date}*\n\n` +
