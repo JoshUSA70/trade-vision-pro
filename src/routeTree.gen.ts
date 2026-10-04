@@ -14,7 +14,9 @@ import { Route as JournalRouteImport } from './routes/journal'
 import { Route as ScannerRouteImport } from './routes/scanner'
 import { Route as ApiAlpacaJournalRouteImport } from './routes/api/alpaca-journal'
 import { Route as ApiAlpacaPositionsRouteImport } from './routes/api/alpaca-positions'
+import { Route as ApiOrderRouteImport } from './routes/api/order'
 import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-history'
+import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
 
 const IndexRoute = IndexRouteImport.update({
@@ -42,9 +44,19 @@ const ApiAlpacaPositionsRoute = ApiAlpacaPositionsRouteImport.update({
   path: '/api/alpaca-positions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOrderRoute = ApiOrderRouteImport.update({
+  id: '/api/order',
+  path: '/api/order',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPortfolioHistoryRoute = ApiPortfolioHistoryRouteImport.update({
   id: '/api/portfolio-history',
   path: '/api/portfolio-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRiskRoute = ApiRiskRouteImport.update({
+  id: '/api/risk',
+  path: '/api/risk',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiScanRoute = ApiScanRouteImport.update({
@@ -59,7 +71,9 @@ export interface FileRoutesByFullPath {
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
+  '/api/order': typeof ApiOrderRoute
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
+  '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
 }
 export interface FileRoutesByTo {
@@ -68,7 +82,9 @@ export interface FileRoutesByTo {
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
+  '/api/order': typeof ApiOrderRoute
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
+  '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
 }
 export interface FileRoutesById {
@@ -78,7 +94,9 @@ export interface FileRoutesById {
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
   '/api/alpaca-positions': typeof ApiAlpacaPositionsRoute
+  '/api/order': typeof ApiOrderRoute
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
+  '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
 }
 export interface FileRouteTypes {
@@ -89,7 +107,9 @@ export interface FileRouteTypes {
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
+    | '/api/order'
     | '/api/portfolio-history'
+    | '/api/risk'
     | '/api/scan'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -98,7 +118,9 @@ export interface FileRouteTypes {
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
+    | '/api/order'
     | '/api/portfolio-history'
+    | '/api/risk'
     | '/api/scan'
   id:
     | '__root__'
@@ -107,7 +129,9 @@ export interface FileRouteTypes {
     | '/scanner'
     | '/api/alpaca-journal'
     | '/api/alpaca-positions'
+    | '/api/order'
     | '/api/portfolio-history'
+    | '/api/risk'
     | '/api/scan'
   fileRoutesById: FileRoutesById
 }
@@ -117,7 +141,9 @@ export interface RootRouteChildren {
   ScannerRoute: typeof ScannerRoute
   ApiAlpacaJournalRoute: typeof ApiAlpacaJournalRoute
   ApiAlpacaPositionsRoute: typeof ApiAlpacaPositionsRoute
+  ApiOrderRoute: typeof ApiOrderRoute
   ApiPortfolioHistoryRoute: typeof ApiPortfolioHistoryRoute
+  ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
 }
 
@@ -158,11 +184,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAlpacaPositionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/order': {
+      id: '/api/order'
+      path: '/api/order'
+      fullPath: '/api/order'
+      preLoaderRoute: typeof ApiOrderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/portfolio-history': {
       id: '/api/portfolio-history'
       path: '/api/portfolio-history'
       fullPath: '/api/portfolio-history'
       preLoaderRoute: typeof ApiPortfolioHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/risk': {
+      id: '/api/risk'
+      path: '/api/risk'
+      fullPath: '/api/risk'
+      preLoaderRoute: typeof ApiRiskRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/scan': {
@@ -181,7 +221,9 @@ const rootRouteChildren: RootRouteChildren = {
   ScannerRoute: ScannerRoute,
   ApiAlpacaJournalRoute: ApiAlpacaJournalRoute,
   ApiAlpacaPositionsRoute: ApiAlpacaPositionsRoute,
+  ApiOrderRoute: ApiOrderRoute,
   ApiPortfolioHistoryRoute: ApiPortfolioHistoryRoute,
+  ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
 }
 export const routeTree = rootRouteImport

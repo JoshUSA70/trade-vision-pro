@@ -1,37 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-// S&P 100 成分股中流動性最高的代表名單
+// V2 智能選股池（15 檔）：指數 ETF + 大型科技股
 const UNIVERSE = [
+  { symbol: 'SPY', name: 'SPDR S&P 500 ETF' },
+  { symbol: 'QQQ', name: 'Invesco QQQ Trust' },
   { symbol: 'AAPL', name: 'Apple Inc.' },
+  { symbol: 'MSFT', name: 'Microsoft Corp.' },
   { symbol: 'NVDA', name: 'NVIDIA Corp.' },
   { symbol: 'TSLA', name: 'Tesla Inc.' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.' },
-  { symbol: 'SPY', name: 'SPDR S&P 500 ETF' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.' },
   { symbol: 'META', name: 'Meta Platforms Inc.' },
   { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+  { symbol: 'AMZN', name: 'Amazon.com Inc.' },
   { symbol: 'AMD', name: 'Advanced Micro Devices' },
-  { symbol: 'JPM', name: 'JPMorgan Chase & Co.' },
-  { symbol: 'V', name: 'Visa Inc.' },
-  { symbol: 'XOM', name: 'Exxon Mobil Corp.' },
-  { symbol: 'UNH', name: 'UnitedHealth Group' },
-  { symbol: 'HD', name: 'Home Depot Inc.' },
-  { symbol: 'PG', name: 'Procter & Gamble Co.' },
-  { symbol: 'MA', name: 'Mastercard Inc.' },
-  { symbol: 'LLY', name: 'Eli Lilly and Co.' },
   { symbol: 'AVGO', name: 'Broadcom Inc.' },
   { symbol: 'COST', name: 'Costco Wholesale' },
   { symbol: 'NFLX', name: 'Netflix Inc.' },
+  { symbol: 'SMH', name: 'VanEck Semiconductor ETF' },
+  { symbol: 'IWM', name: 'iShares Russell 2000 ETF' },
 ];
 
-const DEMO_FALLBACK = [
-  { symbol: 'AAPL', name: 'Apple Inc.', price: 211.35 },
-  { symbol: 'NVDA', name: 'NVIDIA Corp.', price: 142.56 },
-  { symbol: 'TSLA', name: 'Tesla Inc.', price: 248.5 },
-  { symbol: 'MSFT', name: 'Microsoft Corp.', price: 418.92 },
-  { symbol: 'SPY', name: 'SPDR S&P 500 ETF', price: 575.2 },
-];
-
+// 註：Finnhub 免費版不開放 /stock/candle（歷史 K 線一律 403），
+// 故歷史數據走 Yahoo Finance 免費日線（免 key）；/quote 免費但此處收盤價已足夠。
 function rsi14(closes: number[]): number | null {
   if (closes.length < 15) return null;
   let gains = 0;
@@ -53,38 +42,28 @@ function rsi14(closes: number[]): number | null {
   return Math.round((100 - 100 / (1 + rs)) * 10) / 10;
 }
 
-function signalFor(rsi: number): { signal: string; kind: 'buy' | 'sell' | 'hold' } {
-  if (rsi < 35) return { signal: 'BUY 買入', kind: 'buy' };
-  if (rsi > 70) return { signal: 'SELL 賣出', kind: 'sell' };
-  return { signal: 'HOLD 觀望', kind: 'hold' };
-}
-
-// 訊號強度：離 50 越遠分數越高
-function scoreFor(rsi: number): number {
-  return Math.round(100 - Math.abs(50 - rsi) * 2);
-}
-
 type YahooChart = {
   chart?: {
-    result?: Array<{ indicators?: { quote?: Array<{ close?: (number | null)[] }> } }>;
-    error?: unknown;
+    result?: Array<{
+      indicators?: { quote?: Array<{ close?: (number | null)[]; volume?: (number | null)[] }> };
+    }>;
   };
 };
 
-// Yahoo Finance 免費日線（免 key）。注意：非官方接口，失敗時退回示範資料。
-async function fetchCloses(symbol: string): Promise<number[] | null> {
+async function fetchHistory(symbol: string): Promise<{ closes: number[]; volumes: number[] } | null> {
   const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
   for (const host of hosts) {
     try {
-      const res = await fetch(`https://${host}/v8/finance/chart/${symbol}?range=3mo&interval=1d`, {
+      const res = await fetch(`https://${host}/v8/finance/chart/${symbol}?range=6mo&interval=1d`, {
         headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36' },
       });
       if (!res.ok) continue;
       const data = (await res.json()) as YahooChart;
-      const raw = data.chart?.result?.[0]?.indicators?.quote?.[0]?.close;
-      if (!Array.isArray(raw)) continue;
-      const closes = raw.filter((c): c is number => typeof c === 'number' && Number.isFinite(c));
-      if (closes.length >= 15) return closes;
+      const q = data.chart?.result?.[0]?.indicators?.quote?.[0];
+      if (!q || !Array.isArray(q.close) || !Array.isArray(q.volume)) continue;
+      const closes = q.close.filter((c): c is number => typeof c === 'number' && Number.isFinite(c));
+      const volumes = q.volume.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
+      if (closes.length >= 51 && volumes.length >= 21) return { closes, volumes };
     } catch {
       continue;
     }
@@ -92,12 +71,9 @@ async function fetchCloses(symbol: string): Promise<number[] | null> {
   return null;
 }
 
-function demoSignals() {
-  return DEMO_FALLBACK.map((s) => {
-    const rsi = Math.round((30 + Math.random() * 40) * 10) / 10;
-    const { signal, kind } = signalFor(rsi);
-    return { ...s, rsi, signal, kind, score: scoreFor(rsi) };
-  });
+function sma(values: number[], n: number): number {
+  const slice = values.slice(-n);
+  return slice.reduce((a, b) => a + b, 0) / slice.length;
 }
 
 export const Route = createFileRoute('/api/scan')({
@@ -108,38 +84,47 @@ export const Route = createFileRoute('/api/scan')({
         try {
           const results = await Promise.all(
             UNIVERSE.map(async (s) => {
-              const closes = await fetchCloses(s.symbol);
-              if (!closes || closes.length === 0) return null;
+              const hist = await fetchHistory(s.symbol);
+              if (!hist) return null;
+              const { closes, volumes } = hist;
               const rsi = rsi14(closes);
               if (rsi === null) return null;
-              const { signal, kind } = signalFor(rsi);
+              const price = closes[closes.length - 1]!;
+              const sma50 = sma(closes, 50);
+              const todayVol = volumes[volumes.length - 1]!;
+              const avgVol20 = sma(volumes.slice(0, -1), 20);
+              const volume_ratio = avgVol20 > 0 ? Math.round((todayVol / avgVol20) * 100) / 100 : 0;
+
+              let score = 0;
+              if (rsi < 35) score += 40;
+              else if (rsi < 40) score += 20;
+              if (volume_ratio > 1.5) score += 30;
+              else if (volume_ratio > 1.2) score += 15;
+              if (price > sma50) score += 30;
+
+              if (score < 60) return null;
               return {
-                ...s,
-                price: Math.round(closes[closes.length - 1]! * 100) / 100,
+                symbol: s.symbol,
+                name: s.name,
+                price: Math.round(price * 100) / 100,
                 rsi,
-                signal,
-                kind,
-                score: scoreFor(rsi),
+                volume_ratio,
+                score,
+                signal: score > 80 ? 'STRONG_BUY' : 'BUY',
+                sma50: Math.round(sma50 * 100) / 100,
               };
             }),
           );
           const signals = results
             .filter((r): r is NonNullable<typeof r> => r !== null)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 10); // 只回傳訊號最強的前 10 檔
-          if (signals.length === 0) throw new Error('市場數據暫時無法取得');
+            .sort((a, b) => b.score - a.score);
           return Response.json(
             { source: 'yahoo', scanned_at: new Date().toISOString(), signals },
             { headers },
           );
         } catch (err) {
           return Response.json(
-            {
-              source: 'error',
-              error: err instanceof Error ? err.message : '掃描請求失敗',
-              scanned_at: new Date().toISOString(),
-              signals: demoSignals(),
-            },
+            { source: 'error', error: err instanceof Error ? err.message : '掃描請求失敗', signals: [] },
             { status: 502, headers },
           );
         }

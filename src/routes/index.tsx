@@ -34,6 +34,7 @@ function Dashboard() {
   const [account, setAccount] = useState<Account>(null);
   const [curve, setCurve] = useState<CurvePoint[] | null>(null);
   const [source, setSource] = useState<'demo'|'alpaca-paper'>('demo');
+  const [todayTrades, setTodayTrades] = useState<number | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [notice, setNotice] = useState('');
   const live = source === 'alpaca-paper';
@@ -41,16 +42,26 @@ function Dashboard() {
   async function syncData() {
     setSyncing(true);
     try {
-      const [posRes, histRes] = await Promise.all([fetch('/api/alpaca-positions'), fetch('/api/portfolio-history')]);
+      const [posRes, histRes, riskRes] = await Promise.all([
+        fetch('/api/alpaca-positions'),
+        fetch('/api/portfolio-history'),
+        fetch('/api/risk'),
+      ]);
       const posData = await posRes.json() as {source: string; notice?: string; account: Account; positions: Position[]};
       if (posData.source === 'alpaca-paper') { setRows(posData.positions); setAccount(posData.account); setSource('alpaca-paper'); setNotice(''); }
       else if (posData.notice) setNotice(posData.notice);
       const histData = await histRes.json() as {source: string; points: CurvePoint[] | null};
       if (histData.source === 'alpaca-paper' && histData.points) setCurve(histData.points);
+      const riskData = await riskRes.json().catch(() => null) as { todayOrderCount?: number } | null;
+      if (riskData && typeof riskData.todayOrderCount === 'number') setTodayTrades(riskData.todayOrderCount);
     } catch { setNotice('同步失敗，請稍後再試。'); }
     finally { setSyncing(false); }
   }
-  useEffect(() => { void syncData(); }, []);
+  useEffect(() => {
+    void syncData();
+    const id = setInterval(() => { void syncData(); }, 30000); // 每 30 秒自動重新整理持倉
+    return () => clearInterval(id);
+  }, []);
 
   const liveSlice = (n: number) => (curve ?? []).slice(-n).map((p) => ({ date: fmtTick(p.t), value: Math.round(p.equity * 100) / 100 }));
   const chartData = curve
@@ -74,7 +85,7 @@ function Dashboard() {
   const today = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit' });
 
   const liveMetrics = [
-    { label: '總資產', english: 'TOTAL EQUITY', value: money(equity), change: live && dayPnlPct !== null ? `${dayPnlPct >= 0 ? '+' : ''}${dayPnlPct.toFixed(2)}% 本月` : '+2.21% 本月', trend: live ? '相較昨日收盤' : '+$2,438.16', icon: Wallet, positive: true },
+    { label: '總資產', english: 'TOTAL EQUITY', value: money(equity), change: live && dayPnlPct !== null ? `${dayPnlPct >= 0 ? '+' : ''}${dayPnlPct.toFixed(2)}% 本月` : '+2.21% 本月', trend: `${live ? '相較昨日收盤' : '+$2,438.16'}${todayTrades !== null ? ` · 今日已交易 ${todayTrades} 筆` : ''}`, icon: Wallet, positive: true },
     { label: '今日盈虧', english: 'DAILY P&L', value: dayPnl !== null ? signedMoney(dayPnl) : '+$1,284.56', change: dayPnlPct !== null ? `${dayPnlPct >= 0 ? '+' : ''}${dayPnlPct.toFixed(2)}%` : '+1.15%', trend: '相較昨日收盤', icon: BarChart3, positive: (dayPnl ?? 1284.56) >= 0 },
     { label: '持倉數量', english: 'OPEN POSITIONS', value: String(rows.length).padStart(2,'0'), change: `${rows.length} 檔股票`, trend: '橫跨科技與消費', icon: BriefcaseBusiness, positive: null },
     { label: '可用現金', english: 'AVAILABLE CASH', value: money(cash), change: `${(cash / equity * 100).toFixed(2)}%`, trend: '佔總資產比例', icon: CircleDollarSign, positive: null },
