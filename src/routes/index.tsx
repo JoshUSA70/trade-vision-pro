@@ -15,12 +15,6 @@ export const Route = createFileRoute('/')({
   component: Dashboard,
 });
 
-const metrics = [
-  { label: '總資產', english: 'TOTAL EQUITY', value: '$112,648.32', change: '+$2,438.16', trend: '+2.21% 本月', icon: Wallet, positive: true },
-  { label: '今日盈虧', english: 'DAILY P&L', value: '+$1,284.56', change: '+1.15%', trend: '相較昨日收盤', icon: BarChart3, positive: true },
-  { label: '持倉數量', english: 'OPEN POSITIONS', value: '05', change: '5 檔股票', trend: '橫跨科技與消費', icon: BriefcaseBusiness, positive: null },
-  { label: '可用現金', english: 'AVAILABLE CASH', value: '$52,305.01', change: '46.43%', trend: '佔總資產比例', icon: CircleDollarSign, positive: null },
-];
 
 type Position = typeof positions[number];
 type Account = { equity: number; cash: number; buying_power: number; portfolio_value: number } | null;
