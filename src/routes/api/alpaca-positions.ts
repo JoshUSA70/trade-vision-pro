@@ -30,12 +30,12 @@ export const Route = createFileRoute('/api/alpaca-positions')({
             alpacaGet('/v2/positions', key, secret),
           ]);
           const positions = (rawPositions as Array<Record<string, string>>).map((p) => ({
-            symbol: p.symbol,
-            qty: Number(p.qty),
-            avg_price: Number(p.avg_entry_price),
-            market_price: Number(p.current_price),
-            pnl: Number(p.unrealized_pl),
-            change: Number(p.unrealized_plpc) * 100,
+            symbol: p['symbol'],
+            qty: Number(p['qty']),
+            avg_price: Number(p['avg_entry_price']),
+            market_price: Number(p['current_price']),
+            pnl: Number(p['unrealized_pl']),
+            change: Number(p['unrealized_plpc']) * 100,
           }));
           return Response.json({
             source: 'alpaca-paper',
