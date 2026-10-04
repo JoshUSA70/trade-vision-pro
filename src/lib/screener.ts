@@ -5,6 +5,7 @@
 
 import poolData from './candidate-pool.json';
 import { fetchYahooDaily, type YahooDaily } from './yahoo';
+import { loadPoolFromSupabase } from './pool-refresh';
 
 export const CANDIDATE_POOL: Array<{ symbol: string; name: string }> = poolData;
 
@@ -52,11 +53,17 @@ async function mapPool<T, R>(items: T[], fn: (item: T) => Promise<R>, concurrenc
   return results;
 }
 
+export async function getActivePool(): Promise<Array<{ symbol: string; name: string }>> {
+  const db = await loadPoolFromSupabase();
+  return db ?? CANDIDATE_POOL;
+}
+
 export async function runScreener(): Promise<ScreenerResult> {
   const t0 = Date.now();
   const cfg = SCREENER_CONFIG;
+  const pool = await getActivePool();
   const hists = await mapPool(
-    CANDIDATE_POOL,
+    pool,
     async (c): Promise<{ symbol: string; name: string; hist: YahooDaily | null }> => ({
       ...c,
       hist: await fetchYahooDaily(c.symbol, '6mo'),
@@ -89,5 +96,5 @@ export async function runScreener(): Promise<ScreenerResult> {
   // 依流動性（20日均成交金額）排序，取前 N 檔
   qualified.sort((a, b) => b.avgDollarVolM - a.avgDollarVolM);
   const picks = qualified.slice(0, cfg.TOP_N);
-  return { picks, candidates: CANDIDATE_POOL.length, fetched, qualified: qualified.length, durationMs: Date.now() - t0 };
+  return { picks, candidates: pool.length, fetched, qualified: qualified.length, durationMs: Date.now() - t0 };
 }

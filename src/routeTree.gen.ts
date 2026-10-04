@@ -22,6 +22,8 @@ import { Route as ApiScreenerRouteImport } from './routes/api/screener'
 import { Route as ApiCronDailyScanRouteImport } from './routes/api/cron/daily-scan'
 import { Route as ApiCronHistoryRouteImport } from './routes/api/cron/history'
 import { Route as ApiCronTestRouteImport } from './routes/api/cron/test'
+import { Route as ApiCronWeeklyPoolRouteImport } from './routes/api/cron/weekly-pool'
+import { Route as ApiSupabaseStatusRouteImport } from './routes/api/supabase/status'
 import { Route as ApiTelegramTestRouteImport } from './routes/api/telegram/test'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +91,16 @@ const ApiCronTestRoute = ApiCronTestRouteImport.update({
   path: '/api/cron/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronWeeklyPoolRoute = ApiCronWeeklyPoolRouteImport.update({
+  id: '/api/cron/weekly-pool',
+  path: '/api/cron/weekly-pool',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSupabaseStatusRoute = ApiSupabaseStatusRouteImport.update({
+  id: '/api/supabase/status',
+  path: '/api/supabase/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTelegramTestRoute = ApiTelegramTestRouteImport.update({
   id: '/api/telegram/test',
   path: '/api/telegram/test',
@@ -109,6 +121,8 @@ export interface FileRoutesByFullPath {
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
+  '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +139,8 @@ export interface FileRoutesByTo {
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
+  '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRoutesById {
@@ -142,6 +158,8 @@ export interface FileRoutesById {
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
+  '/api/cron/weekly-pool': typeof ApiCronWeeklyPoolRoute
+  '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +178,8 @@ export interface FileRouteTypes {
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
+    | '/api/cron/weekly-pool'
+    | '/api/supabase/status'
     | '/api/telegram/test'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +196,8 @@ export interface FileRouteTypes {
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
+    | '/api/cron/weekly-pool'
+    | '/api/supabase/status'
     | '/api/telegram/test'
   id:
     | '__root__'
@@ -192,6 +214,8 @@ export interface FileRouteTypes {
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
+    | '/api/cron/weekly-pool'
+    | '/api/supabase/status'
     | '/api/telegram/test'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +233,8 @@ export interface RootRouteChildren {
   ApiCronDailyScanRoute: typeof ApiCronDailyScanRoute
   ApiCronHistoryRoute: typeof ApiCronHistoryRoute
   ApiCronTestRoute: typeof ApiCronTestRoute
+  ApiCronWeeklyPoolRoute: typeof ApiCronWeeklyPoolRoute
+  ApiSupabaseStatusRoute: typeof ApiSupabaseStatusRoute
   ApiTelegramTestRoute: typeof ApiTelegramTestRoute
 }
 
@@ -305,6 +331,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/weekly-pool': {
+      id: '/api/cron/weekly-pool'
+      path: '/api/cron/weekly-pool'
+      fullPath: '/api/cron/weekly-pool'
+      preLoaderRoute: typeof ApiCronWeeklyPoolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/supabase/status': {
+      id: '/api/supabase/status'
+      path: '/api/supabase/status'
+      fullPath: '/api/supabase/status'
+      preLoaderRoute: typeof ApiSupabaseStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/telegram/test': {
       id: '/api/telegram/test'
       path: '/api/telegram/test'
@@ -329,6 +369,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronDailyScanRoute: ApiCronDailyScanRoute,
   ApiCronHistoryRoute: ApiCronHistoryRoute,
   ApiCronTestRoute: ApiCronTestRoute,
+  ApiCronWeeklyPoolRoute: ApiCronWeeklyPoolRoute,
+  ApiSupabaseStatusRoute: ApiSupabaseStatusRoute,
   ApiTelegramTestRoute: ApiTelegramTestRoute,
 }
 export const routeTree = rootRouteImport
