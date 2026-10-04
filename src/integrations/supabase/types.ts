@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      positions: {
+        Row: {
+          avg_price: number
+          id: string
+          market_price: number
+          owner_id: string
+          qty: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          avg_price?: number
+          id?: string
+          market_price?: number
+          owner_id: string
+          qty?: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          avg_price?: number
+          id?: string
+          market_price?: number
+          owner_id?: string
+          qty?: number
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      signals: {
+        Row: {
+          id: string
+          owner_id: string
+          price: number
+          rsi: number | null
+          scanned_at: string
+          score: number
+          signal: string
+          symbol: string
+        }
+        Insert: {
+          id?: string
+          owner_id: string
+          price: number
+          rsi?: number | null
+          scanned_at?: string
+          score: number
+          signal: string
+          symbol: string
+        }
+        Update: {
+          id?: string
+          owner_id?: string
+          price?: number
+          rsi?: number | null
+          scanned_at?: string
+          score?: number
+          signal?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          executed_at: string
+          id: string
+          notes: string | null
+          owner_id: string
+          price: number
+          qty: number
+          realized_pnl: number | null
+          side: string
+          symbol: string
+        }
+        Insert: {
+          executed_at?: string
+          id?: string
+          notes?: string | null
+          owner_id: string
+          price: number
+          qty: number
+          realized_pnl?: number | null
+          side: string
+          symbol: string
+        }
+        Update: {
+          executed_at?: string
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          price?: number
+          qty?: number
+          realized_pnl?: number | null
+          side?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
