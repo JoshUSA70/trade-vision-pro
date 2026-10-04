@@ -1,23 +1,11 @@
 // V2/V3 共用：RSI + 量能智能選股引擎（歷史數據走 Yahoo Finance 免費日線，免 key）
 // 註：Finnhub 免費版不開放 /stock/candle（歷史 K 線一律 403），故不用 Finnhub。
 
-export const UNIVERSE = [
-  { symbol: 'SPY', name: 'SPDR S&P 500 ETF' },
-  { symbol: 'QQQ', name: 'Invesco QQQ Trust' },
-  { symbol: 'AAPL', name: 'Apple Inc.' },
-  { symbol: 'MSFT', name: 'Microsoft Corp.' },
-  { symbol: 'NVDA', name: 'NVIDIA Corp.' },
-  { symbol: 'TSLA', name: 'Tesla Inc.' },
-  { symbol: 'META', name: 'Meta Platforms Inc.' },
-  { symbol: 'GOOGL', name: 'Alphabet Inc.' },
-  { symbol: 'AMZN', name: 'Amazon.com Inc.' },
-  { symbol: 'AMD', name: 'Advanced Micro Devices' },
-  { symbol: 'AVGO', name: 'Broadcom Inc.' },
-  { symbol: 'COST', name: 'Costco Wholesale' },
-  { symbol: 'NFLX', name: 'Netflix Inc.' },
-  { symbol: 'SMH', name: 'VanEck Semiconductor ETF' },
-  { symbol: 'IWM', name: 'iShares Russell 2000 ETF' },
-];
+// 選股池改由 src/lib/universe.json 讀取，不再寫死在程式中。
+// 想增減標的：直接編輯該 JSON 檔後重新部署即可。
+import universeData from './universe.json';
+
+export const UNIVERSE: Array<{ symbol: string; name: string }> = universeData;
 
 export type ScanSignal = {
   symbol: string;

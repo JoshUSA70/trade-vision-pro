@@ -7,6 +7,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SectionHeading, SymbolCell } from '@/components/trading-shell';
+import { UNIVERSE } from '@/lib/scan-engine';
 import { money } from '@/lib/trading-demo';
 
 type Trade = {
@@ -122,7 +123,7 @@ export function AutoTradeCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認手動執行</AlertDialogTitle>
             <AlertDialogDescription>
-              將立即執行一次完整自動交易流程：掃描 15 檔股票池，對 Score≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
+              將立即執行一次完整自動交易流程：掃描 {UNIVERSE.length} 檔股票池，對 Score≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
