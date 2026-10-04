@@ -7,7 +7,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { SectionHeading, SymbolCell } from '@/components/trading-shell';
-import { UNIVERSE } from '@/lib/scan-engine';
+import { CANDIDATE_POOL } from '@/lib/screener';
 import { money } from '@/lib/trading-demo';
 
 type Trade = {
@@ -88,7 +88,7 @@ export function AutoTradeCard() {
         <div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><p className="text-[11px] text-muted-foreground">下次執行時間</p><p className="mt-1 text-sm font-semibold text-foreground">{nextRunText()}（美股開盤）</p></div>
-            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · Score≥75 · 最多 3 檔</p></div>
+            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · 智能選股＋四因子評分 · Score≥75</p></div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={() => setConfirmOpen(true)} disabled={running} className="h-8 rounded-sm text-xs font-semibold">
@@ -123,7 +123,7 @@ export function AutoTradeCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認手動執行</AlertDialogTitle>
             <AlertDialogDescription>
-              將立即執行一次完整自動交易流程：掃描 {UNIVERSE.length} 檔股票池，對 Score≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
+              將立即執行一次完整流程：智能選股（約 {CANDIDATE_POOL.length} 檔候選）→ 四因子評分 → 對 Score≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

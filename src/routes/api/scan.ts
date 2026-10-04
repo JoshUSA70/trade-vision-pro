@@ -1,17 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { scanUniverse, UNIVERSE } from '@/lib/scan-engine';
+import { scanUniverse, scoreCandidates } from '@/lib/scan-engine';
+import { runScreener } from '@/lib/screener';
 
-// V2 智能選股引擎：RSI(14) + 量能 + SMA50 評分（Score >= 60 才回傳）
-// 歷史數據走 Yahoo Finance 免費日線（免 key）；Finnhub 免費版不開放 /stock/candle。
+// 智能選股＋四因子評分：先由選股程式從候選池挑出適合交易的股票，
+// 再對這批名單做 RSI/量比/趨勢/MACD 評分（Score >= 60 回傳）。
+// 選股失敗時退回靜態 universe.json 名單。
 export const Route = createFileRoute('/api/scan')({
   server: {
     handlers: {
       GET: async () => {
         const headers = { 'Cache-Control': 'no-store' };
         try {
-          const signals = await scanUniverse(60);
+          let signals;
+          let candidates = 0;
+          let universe = 0;
+          try {
+            const r = await runScreener();
+            candidates = r.candidates;
+            universe = r.picks.length;
+            signals = scoreCandidates(r.picks, 60);
+          } catch {
+            signals = await scanUniverse(60);
+            universe = signals.length;
+          }
           return Response.json(
-            { source: 'yahoo', scanned_at: new Date().toISOString(), universe: UNIVERSE.length, signals },
+            {
+              source: 'yahoo-dynamic',
+              scanned_at: new Date().toISOString(),
+              candidates,
+              universe,
+              signals,
+            },
             { headers },
           );
         } catch (err) {

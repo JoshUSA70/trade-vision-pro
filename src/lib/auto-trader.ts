@@ -1,7 +1,8 @@
 // V3 全自動交易引擎：風控 → 掃描 → 選股下單 → Telegram 通知
 // 由 /api/cron/daily-scan（排程）和 /api/cron/test（手動）共用。
 
-import { scanUniverse, UNIVERSE, type ScanSignal } from './scan-engine';
+import { scoreCandidates, type ScanSignal } from './scan-engine';
+import { runScreener } from './screener';
 import { getAccount, getOrders, getPositions, isTodayET, placeMarketOrder } from './alpaca';
 import { sendTelegram } from './telegram';
 import { logTradeToSupabase } from './trade-log';
@@ -28,7 +29,8 @@ export type AutoOrder = {
 export type AutoTradeResult = {
   success: boolean;
   trigger: 'cron' | 'manual';
-  scanned: number;
+  scanned: number; // 候選池總數
+  universe: number; // 選股程式精選檔數
   qualified: number;
   orders: AutoOrder[];
   skipped: Array<{ symbol: string; reason: string }>;
@@ -42,7 +44,7 @@ function todayTaipei(): string {
 
 export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTradeResult> {
   const result: AutoTradeResult = {
-    success: true, trigger, scanned: UNIVERSE.length, qualified: 0, orders: [], skipped: [],
+    success: true, trigger, scanned: 0, universe: 0, qualified: 0, orders: [], skipped: [],
   };
   try {
     // ── b) 風控檢查 ──
@@ -69,8 +71,11 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
       return result;
     }
 
-    // ── c) 執行掃描 ──
-    const signals: ScanSignal[] = await scanUniverse(MIN_SCORE);
+    // ── c) 智能選股 → 四因子評分 ──
+    const screen = await runScreener();
+    result.scanned = screen.candidates;
+    result.universe = screen.picks.length;
+    const signals: ScanSignal[] = scoreCandidates(screen.picks, MIN_SCORE);
     result.qualified = signals.length;
 
     // ── d) 自動選股下單：最多 3 檔，每檔 1 股 ──
@@ -118,7 +123,7 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
       );
       await sendTelegram(
         `🚀 *Trade Vision 每日自動報告 - ${date}*\n\n` +
-          `📊 掃描 ${UNIVERSE.length} 檔，發現 ${result.qualified} 檔高分訊號\n\n` +
+          `🔍 候選 ${result.scanned} 檔 → 精選 ${result.universe} 檔 → 發現 ${result.qualified} 檔高分訊號\n\n` +
           `買入清單：\n${lines.join('\n')}\n\n` +
           `💰 帳戶：Equity $${Number(equity).toFixed(2)}, 買力 $${Number(buyingPower).toFixed(2)}\n` +
           `⚠️ 今日已交易 ${todayCount + result.orders.length}/${MAX_ORDERS_PER_DAY} 筆`,

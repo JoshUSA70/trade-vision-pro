@@ -4,6 +4,7 @@
 // 選股池改由 src/lib/universe.json 讀取，不再寫死在程式中。
 // 想增減標的：直接編輯該 JSON 檔後重新部署即可。
 import universeData from './universe.json';
+import { fetchYahooDaily } from './yahoo';
 
 export const UNIVERSE: Array<{ symbol: string; name: string }> = universeData;
 
@@ -75,34 +76,6 @@ function sma(values: number[], n: number): number {
   return slice.reduce((a, b) => a + b, 0) / slice.length;
 }
 
-type YahooChart = {
-  chart?: {
-    result?: Array<{
-      indicators?: { quote?: Array<{ close?: (number | null)[]; volume?: (number | null)[] }> };
-    }>;
-  };
-};
-
-async function fetchHistory(symbol: string): Promise<{ closes: number[]; volumes: number[] } | null> {
-  const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
-  for (const host of hosts) {
-    try {
-      const res = await fetch(`https://${host}/v8/finance/chart/${symbol}?range=6mo&interval=1d`, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36' },
-      });
-      if (!res.ok) continue;
-      const data = (await res.json()) as YahooChart;
-      const q = data.chart?.result?.[0]?.indicators?.quote?.[0];
-      if (!q || !Array.isArray(q.close) || !Array.isArray(q.volume)) continue;
-      const closes = q.close.filter((c): c is number => typeof c === 'number' && Number.isFinite(c));
-      const volumes = q.volume.filter((v): v is number => typeof v === 'number' && Number.isFinite(v));
-      if (closes.length >= 51 && volumes.length >= 21) return { closes, volumes };
-    } catch {
-      continue;
-    }
-  }
-  return null;
-}
 
 export type ScoreFeatures = {
   price: number;
@@ -135,39 +108,49 @@ export function scoreStock(f: ScoreFeatures): number {
 }
 
 /** 掃描整個股票池，回傳 Score >= minScore 的訊號（預設 60），按分數排序 */
+export type CandidateBars = { symbol: string; name: string; closes: number[]; volumes: number[] };
+
+/** 對已抓好的K線直接評分（不重複抓取），供 screener 選出的名單使用 */
+export function scoreCandidates(cands: CandidateBars[], minScore = 60): ScanSignal[] {
+  const out: ScanSignal[] = [];
+  for (const c of cands) {
+    const { closes, volumes } = c;
+    const rsi = rsi14(closes);
+    if (rsi === null) continue;
+    const price = closes[closes.length - 1]!;
+    const sma20 = sma(closes, 20);
+    const sma50 = sma(closes, 50);
+    const m = macd(closes);
+    const todayVol = volumes[volumes.length - 1]!;
+    const avgVol20 = sma(volumes.slice(0, -1), 20);
+    const volume_ratio = avgVol20 > 0 ? Math.round((todayVol / avgVol20) * 100) / 100 : 0;
+    const score = scoreStock({ price, rsi, volume_ratio, sma20, sma50, macd: m });
+    if (score < minScore) continue;
+    const trend = price > sma20 && sma20 > sma50 ? '多頭排列' : price > sma50 ? '偏多' : '偏空';
+    out.push({
+      symbol: c.symbol,
+      name: c.name,
+      price: Math.round(price * 100) / 100,
+      rsi,
+      volume_ratio,
+      score,
+      signal: score > 80 ? 'STRONG_BUY' : 'BUY',
+      sma50: Math.round(sma50 * 100) / 100,
+      trend,
+      macd_hist: m ? Math.round(m.histogram * 100) / 100 : null,
+    });
+  }
+  return out.sort((a, b) => b.score - a.score);
+}
+
+/** 靜態 universe.json 快掃（screener 失敗時的退回路徑） */
 export async function scanUniverse(minScore = 60): Promise<ScanSignal[]> {
-  const results = await Promise.all(
-    UNIVERSE.map(async (s) => {
-      const hist = await fetchHistory(s.symbol);
-      if (!hist) return null;
-      const { closes, volumes } = hist;
-      const rsi = rsi14(closes);
-      if (rsi === null) return null;
-      const price = closes[closes.length - 1]!;
-      const sma20 = sma(closes, 20);
-      const sma50 = sma(closes, 50);
-      const m = macd(closes);
-      const todayVol = volumes[volumes.length - 1]!;
-      const avgVol20 = sma(volumes.slice(0, -1), 20);
-      const volume_ratio = avgVol20 > 0 ? Math.round((todayVol / avgVol20) * 100) / 100 : 0;
-      const score = scoreStock({ price, rsi, volume_ratio, sma20, sma50, macd: m });
-      if (score < minScore) return null;
-      const trend = price > sma20 && sma20 > sma50 ? '多頭排列' : price > sma50 ? '偏多' : '偏空';
-      return {
-        symbol: s.symbol,
-        name: s.name,
-        price: Math.round(price * 100) / 100,
-        rsi,
-        volume_ratio,
-        score,
-        signal: score > 80 ? ('STRONG_BUY' as const) : ('BUY' as const),
-        sma50: Math.round(sma50 * 100) / 100,
-        trend: trend as ScanSignal['trend'],
-        macd_hist: m ? Math.round(m.histogram * 100) / 100 : null,
-      };
-    }),
+  const cands: CandidateBars[] = [];
+  const hists = await Promise.all(
+    UNIVERSE.map(async (s) => ({ ...s, hist: await fetchYahooDaily(s.symbol, '6mo') })),
   );
-  return results
-    .filter((r): r is NonNullable<typeof r> => r !== null)
-    .sort((a, b) => b.score - a.score);
+  for (const h of hists) {
+    if (h.hist) cands.push({ symbol: h.symbol, name: h.name, closes: h.hist.closes, volumes: h.hist.volumes });
+  }
+  return scoreCandidates(cands, minScore);
 }

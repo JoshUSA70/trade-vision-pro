@@ -18,6 +18,7 @@ import { Route as ApiOrderRouteImport } from './routes/api/order'
 import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-history'
 import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
+import { Route as ApiScreenerRouteImport } from './routes/api/screener'
 import { Route as ApiCronDailyScanRouteImport } from './routes/api/cron/daily-scan'
 import { Route as ApiCronHistoryRouteImport } from './routes/api/cron/history'
 import { Route as ApiCronTestRouteImport } from './routes/api/cron/test'
@@ -68,6 +69,11 @@ const ApiScanRoute = ApiScanRouteImport.update({
   path: '/api/scan',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiScreenerRoute = ApiScreenerRouteImport.update({
+  id: '/api/screener',
+  path: '/api/screener',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronDailyScanRoute = ApiCronDailyScanRouteImport.update({
   id: '/api/cron/daily-scan',
   path: '/api/cron/daily-scan',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/screener': typeof ApiScreenerRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/screener': typeof ApiScreenerRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/api/portfolio-history': typeof ApiPortfolioHistoryRoute
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
+  '/api/screener': typeof ApiScreenerRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/screener'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/screener'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/api/portfolio-history'
     | '/api/risk'
     | '/api/scan'
+    | '/api/screener'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   ApiPortfolioHistoryRoute: typeof ApiPortfolioHistoryRoute
   ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
+  ApiScreenerRoute: typeof ApiScreenerRoute
   ApiCronDailyScanRoute: typeof ApiCronDailyScanRoute
   ApiCronHistoryRoute: typeof ApiCronHistoryRoute
   ApiCronTestRoute: typeof ApiCronTestRoute
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiScanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/screener': {
+      id: '/api/screener'
+      path: '/api/screener'
+      fullPath: '/api/screener'
+      preLoaderRoute: typeof ApiScreenerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/daily-scan': {
       id: '/api/cron/daily-scan'
       path: '/api/cron/daily-scan'
@@ -305,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPortfolioHistoryRoute: ApiPortfolioHistoryRoute,
   ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
+  ApiScreenerRoute: ApiScreenerRoute,
   ApiCronDailyScanRoute: ApiCronDailyScanRoute,
   ApiCronHistoryRoute: ApiCronHistoryRoute,
   ApiCronTestRoute: ApiCronTestRoute,
