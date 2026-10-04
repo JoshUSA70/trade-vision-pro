@@ -22,8 +22,30 @@ const metrics = [
   { label: '可用現金', english: 'AVAILABLE CASH', value: '$52,305.01', change: '46.43%', trend: '佔總資產比例', icon: CircleDollarSign, positive: null },
 ];
 
+type Position = typeof positions[number];
+type Account = { equity: number; cash: number; buying_power: number; portfolio_value: number } | null;
+
 function Dashboard() {
   const [period, setPeriod] = useState<'1M'|'3M'|'1Y'>('1M');
+  const [rows, setRows] = useState<Position[]>(positions);
+  const [account, setAccount] = useState<Account>(null);
+  const [source, setSource] = useState<'demo'|'alpaca-paper'>('demo');
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/alpaca-positions').then(r => r.json()).then((data: {source: string; account: Account; positions: Position[]}) => {
+      if (cancelled) return;
+      if (data.source === 'alpaca-paper') { setRows(data.positions); setAccount(data.account); setSource('alpaca-paper'); }
+    }).catch(() => { /* keep demo data */ });
+    return () => { cancelled = true; };
+  }, []);
+  const equity = account ? account.equity : 112648.32;
+  const cash = account ? account.cash : 52305.01;
+  const liveMetrics = [
+    { label: '總資產', english: 'TOTAL EQUITY', value: money(equity), change: '+$2,438.16', trend: '+2.21% 本月', icon: Wallet, positive: true },
+    { label: '今日盈虧', english: 'DAILY P&L', value: '+$1,284.56', change: '+1.15%', trend: '相較昨日收盤', icon: BarChart3, positive: true },
+    { label: '持倉數量', english: 'OPEN POSITIONS', value: String(rows.length).padStart(2,'0'), change: `${rows.length} 檔股票`, trend: '橫跨科技與消費', icon: BriefcaseBusiness, positive: null },
+    { label: '可用現金', english: 'AVAILABLE CASH', value: money(cash), change: `${(cash / equity * 100).toFixed(2)}%`, trend: '佔總資產比例', icon: CircleDollarSign, positive: null },
+  ];
   const chartData = period === '1M' ? equityCurve : period === '3M'
     ? [{date:'07/04',value:96120},{date:'07/18',value:98760},{date:'08/01',value:100430},{date:'08/15',value:99670},{date:'08/29',value:103100},...equityCurve]
     : [{date:'01/01',value:82400},{date:'02/01',value:86420},{date:'03/01',value:84270},{date:'04/01',value:92350},{date:'05/01',value:90620},{date:'06/01',value:94780},{date:'07/01',value:96120},{date:'08/01',value:100430},...equityCurve];
