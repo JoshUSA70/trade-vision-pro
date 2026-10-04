@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ArrowRight, ArrowUpRight, BarChart3, BriefcaseBusiness, CircleDollarSign, Clock3, Wallet } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, BarChart3, BriefcaseBusiness, CircleDollarSign, Clock3, RefreshCw, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TradingShell, PageHeading, SectionHeading, Movement, SymbolCell } from '@/components/trading-shell';
 import { equityCurve, money, positions, signedMoney } from '@/lib/trading-demo';
@@ -24,14 +24,19 @@ function Dashboard() {
   const [rows, setRows] = useState<Position[]>(positions);
   const [account, setAccount] = useState<Account>(null);
   const [source, setSource] = useState<'demo'|'alpaca-paper'>('demo');
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/alpaca-positions').then(r => r.json()).then((data: {source: string; account: Account; positions: Position[]}) => {
-      if (cancelled) return;
-      if (data.source === 'alpaca-paper') { setRows(data.positions); setAccount(data.account); setSource('alpaca-paper'); }
-    }).catch(() => { /* keep demo data */ });
-    return () => { cancelled = true; };
-  }, []);
+  const [syncing, setSyncing] = useState(false);
+  const [notice, setNotice] = useState('');
+  async function syncPositions() {
+    setSyncing(true);
+    try {
+      const r = await fetch('/api/alpaca-positions');
+      const data = await r.json() as {source: string; notice?: string; account: Account; positions: Position[]};
+      if (data.source === 'alpaca-paper') { setRows(data.positions); setAccount(data.account); setSource('alpaca-paper'); setNotice(''); }
+      else if (data.notice) setNotice(data.notice);
+    } catch { setNotice('同步失敗，請稍後再試。'); }
+    finally { setSyncing(false); }
+  }
+  useEffect(() => { void syncPositions(); }, []);
   const equity = account ? account.equity : 112648.32;
   const cash = account ? account.cash : 52305.01;
   const liveMetrics = [
