@@ -1,7 +1,7 @@
-// 盤中策略：15 分鐘 K 線確認因子
+// 盤中策略：5 分鐘 K 線確認因子
 // 在日線四因子評分之後，對領先者做盤中加減分（-15 ~ +15）：
-//   15分 RSI(14) 動能、現價 vs 今日 VWAP、第一根 15分K 紅黑
-// 非交易時段（無今日 15分K）時回傳 adjustment 0，不影響日線評分。
+//   5分 RSI(14) 動能、現價 vs 今日 VWAP、第一根 5分K 紅黑
+// 非交易時段（無今日 5分K）時回傳 adjustment 0，不影響日線評分。
 
 import { rsi14 } from './scan-engine';
 import { todayET } from './alpaca';
@@ -11,7 +11,7 @@ export type IntradayBar = { t: number; o: number; h: number; l: number; c: numbe
 export type IntradayCheck = {
   available: boolean;
   barsToday: number;
-  rsi15: number | null;
+  rsi5: number | null;
   vsVwapPct: number | null;
   firstBarUp: boolean | null;
   adjustment: number; // -15 ~ +15
@@ -67,11 +67,11 @@ async function fetchOnce(url: string, timeoutMs: number): Promise<IntradayBar[] 
   }
 }
 
-/** 抓 5 天 15分K（約 130 根，足夠算 15分 RSI） */
-export async function fetchIntraday15m(symbol: string, timeoutMs = 12000): Promise<IntradayBar[] | null> {
+/** 抓 5 天 5分K（約 390 根，足夠算 5分 RSI） */
+export async function fetchIntraday5m(symbol: string, timeoutMs = 12000): Promise<IntradayBar[] | null> {
   const hosts = ['query1.finance.yahoo.com', 'query2.finance.yahoo.com'];
   for (const host of hosts) {
-    const r = await fetchOnce(`https://${host}/v8/finance/chart/${symbol}?range=5d&interval=15m`, timeoutMs);
+    const r = await fetchOnce(`https://${host}/v8/finance/chart/${symbol}?range=5d&interval=5m`, timeoutMs);
     if (r) return r;
   }
   return null;
@@ -83,7 +83,7 @@ function etDate(tSec: number): string {
 
 export function intradayAdjustment(bars: IntradayBar[] | null): IntradayCheck {
   const base: IntradayCheck = {
-    available: false, barsToday: 0, rsi15: null, vsVwapPct: null,
+    available: false, barsToday: 0, rsi5: null, vsVwapPct: null,
     firstBarUp: null, adjustment: 0, note: '無今日盤中數據',
   };
   if (!bars || bars.length === 0) return base;
@@ -91,7 +91,7 @@ export function intradayAdjustment(bars: IntradayBar[] | null): IntradayCheck {
   const todayBars = bars.filter((b) => etDate(b.t) === today);
   if (todayBars.length === 0) return { ...base, note: '今日尚未開盤' };
   const closes = bars.map((b) => b.c);
-  const rsi15 = rsi14(closes.slice(-60)); // 近 60 根 15分K 的 RSI
+  const rsi5 = rsi14(closes.slice(-120)); // 近 120 根 5分K 的 RSI
   const last = todayBars[todayBars.length - 1]!;
   let pv = 0;
   let vv = 0;
@@ -106,12 +106,12 @@ export function intradayAdjustment(bars: IntradayBar[] | null): IntradayCheck {
 
   let adjustment = 0;
   const parts: string[] = [];
-  if (rsi15 !== null) {
-    if (rsi15 > 60) { adjustment += 8; parts.push(`RSI15 ${rsi15.toFixed(0)} 強`); }
-    else if (rsi15 > 55) { adjustment += 5; parts.push(`RSI15 ${rsi15.toFixed(0)} 偏強`); }
-    else if (rsi15 > 50) { adjustment += 2; parts.push(`RSI15 ${rsi15.toFixed(0)} 中性偏多`); }
-    else if (rsi15 < 40) { adjustment -= 10; parts.push(`RSI15 ${rsi15.toFixed(0)} 弱`); }
-    else if (rsi15 < 45) { adjustment -= 5; parts.push(`RSI15 ${rsi15.toFixed(0)} 偏弱`); }
+  if (rsi5 !== null) {
+    if (rsi5 > 60) { adjustment += 8; parts.push(`RSI5 ${rsi5.toFixed(0)} 強`); }
+    else if (rsi5 > 55) { adjustment += 5; parts.push(`RSI5 ${rsi5.toFixed(0)} 偏強`); }
+    else if (rsi5 > 50) { adjustment += 2; parts.push(`RSI5 ${rsi5.toFixed(0)} 中性偏多`); }
+    else if (rsi5 < 40) { adjustment -= 10; parts.push(`RSI5 ${rsi5.toFixed(0)} 弱`); }
+    else if (rsi5 < 45) { adjustment -= 5; parts.push(`RSI5 ${rsi5.toFixed(0)} 偏弱`); }
   }
   if (vsVwapPct !== null) {
     if (vsVwapPct > 0.3) { adjustment += 4; parts.push('站上VWAP'); }
@@ -126,7 +126,7 @@ export function intradayAdjustment(bars: IntradayBar[] | null): IntradayCheck {
   return {
     available: true,
     barsToday: todayBars.length,
-    rsi15: rsi15 !== null ? Math.round(rsi15 * 10) / 10 : null,
+    rsi5: rsi5 !== null ? Math.round(rsi5 * 10) / 10 : null,
     vsVwapPct,
     firstBarUp,
     adjustment,

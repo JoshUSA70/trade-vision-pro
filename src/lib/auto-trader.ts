@@ -3,7 +3,7 @@
 
 import { scoreCandidates, type ScanSignal } from './scan-engine';
 import { runScreener } from './screener';
-import { fetchIntraday15m, intradayAdjustment } from './intraday';
+import { fetchIntraday5m, intradayAdjustment } from './intraday';
 import { getAccount, getOrders, getPositions, isTodayET, placeMarketOrder } from './alpaca';
 import { sendTelegram } from './telegram';
 import { logTradeToSupabase } from './trade-log';
@@ -20,7 +20,7 @@ export type AutoOrder = {
   symbol: string;
   price: number;
   score: number; // 日線四因子分數
-  intraday_adj: number; // 盤中 15分K 調整（-15~+15）
+  intraday_adj: number; // 盤中 5分K 調整（-15~+15）
   final_score: number; // 最終分數 = 日線分數 + 盤中調整
   intraday_note: string;
   rsi: number;
@@ -85,10 +85,10 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
     result.universe = screen.picks.length;
     const dailySignals: ScanSignal[] = scoreCandidates(screen.picks, DAILY_PREFILTER);
 
-    // ── d) 盤中 15分K 確認：對日線前 N 名做加減分 ──
+    // ── d) 盤中 5分K 確認：對日線前 N 名做加減分 ──
     const withIntraday = await Promise.all(
       dailySignals.slice(0, INTRADAY_TOP_N).map(async (sg) => {
-        const bars = await fetchIntraday15m(sg.symbol);
+        const bars = await fetchIntraday5m(sg.symbol);
         const check = intradayAdjustment(bars);
         return { sg, check, finalScore: sg.score + check.adjustment };
       }),

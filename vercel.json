@@ -1,1 +1,1 @@
-{"crons": [{"path": "/api/cron/daily-scan", "schedule": "45 14 * * 1-5"}, {"path": "/api/cron/weekly-pool", "schedule": "0 12 * * 0"}]}
+{"crons": [{"path": "/api/cron/daily-scan", "schedule": "35 14 * * 1-5"}, {"path": "/api/cron/weekly-pool", "schedule": "0 12 * * 0"}]}
