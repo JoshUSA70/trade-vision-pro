@@ -1,3 +1,4 @@
+import { requirePageAuth } from '@/lib/route-auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Radar, RefreshCw, ShieldCheck, SlidersHorizontal } from 'lucide-react';
@@ -14,7 +15,8 @@ export const Route = createFileRoute('/scanner')({ head: () => ({ meta: [
   {title:'股票掃描 | JoshQuantTrader Pro'}, {name:'description',content:'RSI + 量能智能選股，評分達標即顯示買入訊號。'},
   {property:'og:title',content:'股票掃描 | JoshQuantTrader Pro'}, {property:'og:description',content:'RSI + 量能智能選股引擎。'},
   {property:'og:type',content:'website'}, {name:'twitter:card',content:'summary'},
-] }), component: Scanner });
+] }), beforeLoad: requirePageAuth,
+  component: Scanner });
 
 type Signal = {
   symbol: string; name: string; price: number; rsi: number;

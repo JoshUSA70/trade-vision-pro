@@ -5,6 +5,7 @@
 import masterData from './master-universe.json';
 import { fetchYahooDaily } from './yahoo';
 import { getSupabaseAdmin } from './supabase';
+import { getAppConfig } from './app-config';
 
 export const MASTER_UNIVERSE: Array<{ symbol: string; name: string; sector: string }> = masterData;
 export const POOL_SIZE = 101;
@@ -53,7 +54,8 @@ async function mapPool<T, R>(items: T[], fn: (item: T) => Promise<R>, concurrenc
 
 export async function refreshCandidatePool(): Promise<PoolRefreshResult> {
   const t0 = Date.now();
-  const cfg = POOL_REFRESH_CONFIG;
+  const acfg = await getAppConfig();
+  const cfg = { ...POOL_REFRESH_CONFIG, MIN_DOLLAR_VOL_M: acfg.pool_min_dollar_vol_m };
   const hists = await mapPool(
     MASTER_UNIVERSE,
     async (c) => ({ ...c, hist: await fetchYahooDaily(c.symbol, '3mo') }),

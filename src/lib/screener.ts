@@ -6,6 +6,7 @@
 import poolData from './candidate-pool.json';
 import { fetchYahooDaily, type YahooDaily } from './yahoo';
 import { loadPoolFromSupabase } from './pool-refresh';
+import { getAppConfig } from './app-config';
 
 export const CANDIDATE_POOL: Array<{ symbol: string; name: string }> = poolData;
 
@@ -60,7 +61,8 @@ export async function getActivePool(): Promise<Array<{ symbol: string; name: str
 
 export async function runScreener(): Promise<ScreenerResult> {
   const t0 = Date.now();
-  const cfg = SCREENER_CONFIG;
+  const acfg = await getAppConfig();
+  const cfg = { ...SCREENER_CONFIG, TOP_N: acfg.screen_top_n, MIN_PRICE: acfg.screen_min_price, MIN_DOLLAR_VOL_M: acfg.screen_min_dollar_vol_m };
   const pool = await getActivePool();
   const hists = await mapPool(
     pool,

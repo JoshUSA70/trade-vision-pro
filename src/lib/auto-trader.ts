@@ -4,6 +4,7 @@
 import { scoreCandidates, type ScanSignal } from './scan-engine';
 import { runScreener } from './screener';
 import { fetchIntraday5m, intradayAdjustment } from './intraday';
+import { getAppConfig } from './app-config';
 import { getAccount, getOrders, getPositions, isTodayET, placeMarketOrder } from './alpaca';
 import { sendTelegram } from './telegram';
 import { logTradeToSupabase } from './trade-log';
@@ -11,10 +12,7 @@ import { logTradeToSupabase } from './trade-log';
 const MAX_DAY_LOSS_PCT = 2;
 const MAX_ORDERS_PER_DAY = 5;
 const MAX_POSITION_PCT = 25;
-const MIN_SCORE = 75; // 盤中調整後的最終分數門檻
-const DAILY_PREFILTER = 60; // 日線先取前 N 名再做盤中確認
-const INTRADAY_TOP_N = 8;
-const MAX_BUYS = 3;
+// 交易參數改由 Supabase app_config 讀取（管理介面可調），此處僅為註記，實際值見 getAppConfig()
 
 export type AutoOrder = {
   symbol: string;
@@ -79,13 +77,20 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
       return result;
     }
 
-    // ── c) 智能選股 → 日線四因子評分 ──
+    // ── c) 讀取交易參數（管理介面可調） ──
+    const tcfg = await getAppConfig();
+    const MIN_SCORE = tcfg.trade_min_score;
+    const DAILY_PREFILTER = tcfg.trade_daily_prefilter;
+    const INTRADAY_TOP_N = tcfg.trade_intraday_top_n;
+    const MAX_BUYS = tcfg.trade_max_buys;
+
+    // ── d) 智能選股 → 日線四因子評分 ──
     const screen = await runScreener();
     result.scanned = screen.candidates;
     result.universe = screen.picks.length;
     const dailySignals: ScanSignal[] = scoreCandidates(screen.picks, DAILY_PREFILTER);
 
-    // ── d) 盤中 5分K 確認：對日線前 N 名做加減分 ──
+    // ── e) 盤中 5分K 確認：對日線前 N 名做加減分 ──
     const withIntraday = await Promise.all(
       dailySignals.slice(0, INTRADAY_TOP_N).map(async (sg) => {
         const bars = await fetchIntraday5m(sg.symbol);
@@ -141,7 +146,7 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
       }
     }
 
-    // ── e) Telegram 通知 ──
+    // ── f) Telegram 通知 ──
     const date = todayTaipei();
     if (result.orders.length > 0) {
       const lines = result.orders.map(

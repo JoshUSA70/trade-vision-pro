@@ -1,3 +1,4 @@
+import { requirePageAuth } from '@/lib/route-auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { CalendarRange, Layers, RefreshCw, TrendingDown, TrendingUp } from 'lucide-react';
@@ -13,7 +14,8 @@ export const Route = createFileRoute('/pool')({ head: () => ({ meta: [
   {title:'股票池 | JoshQuantTrader Pro'}, {name:'description',content:'每周重選的候選股票池與週報：新進、剔除名單對照。'},
   {property:'og:title',content:'股票池 | JoshQuantTrader Pro'}, {property:'og:description',content:'每周候選池與週報。'},
   {property:'og:type',content:'website'}, {name:'twitter:card',content:'summary'},
-] }), component: PoolPage });
+] }), beforeLoad: requirePageAuth,
+  component: PoolPage });
 
 type Pick = {
   symbol: string; name: string; sector: string | null; rank: number;

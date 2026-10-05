@@ -1,3 +1,4 @@
+import { requirePageAuth } from '@/lib/route-auth';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
@@ -13,6 +14,7 @@ export const Route = createFileRoute('/')({
     { property: 'og:title', content: '總覽儀表板 | JoshQuantTrader Pro' }, { property: 'og:description', content: '個人量化美股交易終端，檢視資產、資金曲線與持倉。' },
     { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' },
   ] }),
+  beforeLoad: requirePageAuth,
   component: Dashboard,
 });
 

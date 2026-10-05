@@ -1,3 +1,4 @@
+import { requirePageAuth } from '@/lib/route-auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { BookOpen, CalendarDays, CircleCheck, TrendingUp } from 'lucide-react';
@@ -8,7 +9,8 @@ export const Route = createFileRoute('/journal')({ head: () => ({ meta: [
   {title:'交易日誌 | JoshQuantTrader Pro'}, {name:'description',content:'檢視 JoshQuantTrader Pro 的美股交易日誌與交易績效。'},
   {property:'og:title',content:'交易日誌 | JoshQuantTrader Pro'}, {property:'og:description',content:'檢視量化美股交易日誌與歷史交易績效。'},
   {property:'og:type',content:'website'}, {name:'twitter:card',content:'summary'},
-] }), component: Journal });
+] }), beforeLoad: requirePageAuth,
+  component: Journal });
 
 type Trade = typeof trades[number];
 
