@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as PoolRouteImport } from './routes/pool'
 import { Route as ScannerRouteImport } from './routes/scanner'
 import { Route as ApiAlpacaJournalRouteImport } from './routes/api/alpaca-journal'
@@ -21,6 +23,14 @@ import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-
 import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
 import { Route as ApiScreenerRouteImport } from './routes/api/screener'
+import { Route as ApiAdminConfigRouteImport } from './routes/api/admin/config'
+import { Route as ApiAdminHealthRouteImport } from './routes/api/admin/health'
+import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthMeRouteImport } from './routes/api/auth/me'
+import { Route as ApiAuthSetupRouteImport } from './routes/api/auth/setup'
+import { Route as ApiAuthSetupStatusRouteImport } from './routes/api/auth/setup-status'
 import { Route as ApiCronDailyScanRouteImport } from './routes/api/cron/daily-scan'
 import { Route as ApiCronHistoryRouteImport } from './routes/api/cron/history'
 import { Route as ApiCronTestRouteImport } from './routes/api/cron/test'
@@ -28,15 +38,26 @@ import { Route as ApiCronWeeklyPoolRouteImport } from './routes/api/cron/weekly-
 import { Route as ApiPoolHistoryRouteImport } from './routes/api/pool/history'
 import { Route as ApiSupabaseStatusRouteImport } from './routes/api/supabase/status'
 import { Route as ApiTelegramTestRouteImport } from './routes/api/telegram/test'
+import { Route as ApiAdminUsersUserIdRouteImport } from './routes/api/admin/users/$userId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JournalRoute = JournalRouteImport.update({
   id: '/journal',
   path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PoolRoute = PoolRouteImport.update({
@@ -89,6 +110,46 @@ const ApiScreenerRoute = ApiScreenerRouteImport.update({
   path: '/api/screener',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminConfigRoute = ApiAdminConfigRouteImport.update({
+  id: '/api/admin/config',
+  path: '/api/admin/config',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminHealthRoute = ApiAdminHealthRouteImport.update({
+  id: '/api/admin/health',
+  path: '/api/admin/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
+  id: '/api/admin/users',
+  path: '/api/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthMeRoute = ApiAuthMeRouteImport.update({
+  id: '/api/auth/me',
+  path: '/api/auth/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSetupRoute = ApiAuthSetupRouteImport.update({
+  id: '/api/auth/setup',
+  path: '/api/auth/setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSetupStatusRoute = ApiAuthSetupStatusRouteImport.update({
+  id: '/api/auth/setup-status',
+  path: '/api/auth/setup-status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCronDailyScanRoute = ApiCronDailyScanRouteImport.update({
   id: '/api/cron/daily-scan',
   path: '/api/cron/daily-scan',
@@ -124,10 +185,17 @@ const ApiTelegramTestRoute = ApiTelegramTestRouteImport.update({
   path: '/api/telegram/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminUsersUserIdRoute = ApiAdminUsersUserIdRouteImport.update({
+  id: '/$userId',
+  path: '/$userId',
+  getParentRoute: () => ApiAdminUsersRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
@@ -138,6 +206,14 @@ export interface FileRoutesByFullPath {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/admin/config': typeof ApiAdminConfigRoute
+  '/api/admin/health': typeof ApiAdminHealthRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/setup': typeof ApiAuthSetupRoute
+  '/api/auth/setup-status': typeof ApiAuthSetupStatusRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -145,10 +221,13 @@ export interface FileRoutesByFullPath {
   '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
@@ -159,6 +238,14 @@ export interface FileRoutesByTo {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/admin/config': typeof ApiAdminConfigRoute
+  '/api/admin/health': typeof ApiAdminHealthRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/setup': typeof ApiAuthSetupRoute
+  '/api/auth/setup-status': typeof ApiAuthSetupStatusRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -166,11 +253,14 @@ export interface FileRoutesByTo {
   '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/journal': typeof JournalRoute
+  '/login': typeof LoginRoute
   '/pool': typeof PoolRoute
   '/scanner': typeof ScannerRoute
   '/api/alpaca-journal': typeof ApiAlpacaJournalRoute
@@ -181,6 +271,14 @@ export interface FileRoutesById {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/admin/config': typeof ApiAdminConfigRoute
+  '/api/admin/health': typeof ApiAdminHealthRoute
+  '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/me': typeof ApiAuthMeRoute
+  '/api/auth/setup': typeof ApiAuthSetupRoute
+  '/api/auth/setup-status': typeof ApiAuthSetupStatusRoute
   '/api/cron/daily-scan': typeof ApiCronDailyScanRoute
   '/api/cron/history': typeof ApiCronHistoryRoute
   '/api/cron/test': typeof ApiCronTestRoute
@@ -188,12 +286,15 @@ export interface FileRoutesById {
   '/api/pool/history': typeof ApiPoolHistoryRoute
   '/api/supabase/status': typeof ApiSupabaseStatusRoute
   '/api/telegram/test': typeof ApiTelegramTestRoute
+  '/api/admin/users/$userId': typeof ApiAdminUsersUserIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/journal'
+    | '/login'
     | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
@@ -204,6 +305,14 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/admin/config'
+    | '/api/admin/health'
+    | '/api/admin/users'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/setup'
+    | '/api/auth/setup-status'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -211,10 +320,13 @@ export interface FileRouteTypes {
     | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
+    | '/api/admin/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/journal'
+    | '/login'
     | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
@@ -225,6 +337,14 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/admin/config'
+    | '/api/admin/health'
+    | '/api/admin/users'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/setup'
+    | '/api/auth/setup-status'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -232,10 +352,13 @@ export interface FileRouteTypes {
     | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
+    | '/api/admin/users/$userId'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/journal'
+    | '/login'
     | '/pool'
     | '/scanner'
     | '/api/alpaca-journal'
@@ -246,6 +369,14 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/admin/config'
+    | '/api/admin/health'
+    | '/api/admin/users'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/me'
+    | '/api/auth/setup'
+    | '/api/auth/setup-status'
     | '/api/cron/daily-scan'
     | '/api/cron/history'
     | '/api/cron/test'
@@ -253,11 +384,14 @@ export interface FileRouteTypes {
     | '/api/pool/history'
     | '/api/supabase/status'
     | '/api/telegram/test'
+    | '/api/admin/users/$userId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   JournalRoute: typeof JournalRoute
+  LoginRoute: typeof LoginRoute
   PoolRoute: typeof PoolRoute
   ScannerRoute: typeof ScannerRoute
   ApiAlpacaJournalRoute: typeof ApiAlpacaJournalRoute
@@ -268,6 +402,14 @@ export interface RootRouteChildren {
   ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
   ApiScreenerRoute: typeof ApiScreenerRoute
+  ApiAdminConfigRoute: typeof ApiAdminConfigRoute
+  ApiAdminHealthRoute: typeof ApiAdminHealthRoute
+  ApiAdminUsersRoute: typeof ApiAdminUsersRouteWithChildren
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthMeRoute: typeof ApiAuthMeRoute
+  ApiAuthSetupRoute: typeof ApiAuthSetupRoute
+  ApiAuthSetupStatusRoute: typeof ApiAuthSetupStatusRoute
   ApiCronDailyScanRoute: typeof ApiCronDailyScanRoute
   ApiCronHistoryRoute: typeof ApiCronHistoryRoute
   ApiCronTestRoute: typeof ApiCronTestRoute
@@ -285,11 +427,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/journal': {
       id: '/journal'
       path: '/journal'
       fullPath: '/journal'
       preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pool': {
@@ -362,6 +518,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiScreenerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/config': {
+      id: '/api/admin/config'
+      path: '/api/admin/config'
+      fullPath: '/api/admin/config'
+      preLoaderRoute: typeof ApiAdminConfigRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/health': {
+      id: '/api/admin/health'
+      path: '/api/admin/health'
+      fullPath: '/api/admin/health'
+      preLoaderRoute: typeof ApiAdminHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/users': {
+      id: '/api/admin/users'
+      path: '/api/admin/users'
+      fullPath: '/api/admin/users'
+      preLoaderRoute: typeof ApiAdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/me': {
+      id: '/api/auth/me'
+      path: '/api/auth/me'
+      fullPath: '/api/auth/me'
+      preLoaderRoute: typeof ApiAuthMeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/setup': {
+      id: '/api/auth/setup'
+      path: '/api/auth/setup'
+      fullPath: '/api/auth/setup'
+      preLoaderRoute: typeof ApiAuthSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/setup-status': {
+      id: '/api/auth/setup-status'
+      path: '/api/auth/setup-status'
+      fullPath: '/api/auth/setup-status'
+      preLoaderRoute: typeof ApiAuthSetupStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/cron/daily-scan': {
       id: '/api/cron/daily-scan'
       path: '/api/cron/daily-scan'
@@ -411,6 +623,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTelegramTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/admin/users/$userId': {
+      id: '/api/admin/users/$userId'
+      path: '/$userId'
+      fullPath: '/api/admin/users/$userId'
+      preLoaderRoute: typeof ApiAdminUsersUserIdRouteImport
+      parentRoute: typeof ApiAdminUsersRoute
+    }
   }
 }
 
@@ -425,9 +644,23 @@ const ApiPoolRouteChildren: ApiPoolRouteChildren = {
 const ApiPoolRouteWithChildren =
   ApiPoolRoute._addFileChildren(ApiPoolRouteChildren)
 
+interface ApiAdminUsersRouteChildren {
+  ApiAdminUsersUserIdRoute: typeof ApiAdminUsersUserIdRoute
+}
+
+const ApiAdminUsersRouteChildren: ApiAdminUsersRouteChildren = {
+  ApiAdminUsersUserIdRoute: ApiAdminUsersUserIdRoute,
+}
+
+const ApiAdminUsersRouteWithChildren = ApiAdminUsersRoute._addFileChildren(
+  ApiAdminUsersRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   JournalRoute: JournalRoute,
+  LoginRoute: LoginRoute,
   PoolRoute: PoolRoute,
   ScannerRoute: ScannerRoute,
   ApiAlpacaJournalRoute: ApiAlpacaJournalRoute,
@@ -438,6 +671,14 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
   ApiScreenerRoute: ApiScreenerRoute,
+  ApiAdminConfigRoute: ApiAdminConfigRoute,
+  ApiAdminHealthRoute: ApiAdminHealthRoute,
+  ApiAdminUsersRoute: ApiAdminUsersRouteWithChildren,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthMeRoute: ApiAuthMeRoute,
+  ApiAuthSetupRoute: ApiAuthSetupRoute,
+  ApiAuthSetupStatusRoute: ApiAuthSetupStatusRoute,
   ApiCronDailyScanRoute: ApiCronDailyScanRoute,
   ApiCronHistoryRoute: ApiCronHistoryRoute,
   ApiCronTestRoute: ApiCronTestRoute,
