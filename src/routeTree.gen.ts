@@ -23,6 +23,7 @@ import { Route as ApiPortfolioHistoryRouteImport } from './routes/api/portfolio-
 import { Route as ApiRiskRouteImport } from './routes/api/risk'
 import { Route as ApiScanRouteImport } from './routes/api/scan'
 import { Route as ApiScreenerRouteImport } from './routes/api/screener'
+import { Route as ApiTradeConfigRouteImport } from './routes/api/trade-config'
 import { Route as ApiAdminConfigRouteImport } from './routes/api/admin/config'
 import { Route as ApiAdminHealthRouteImport } from './routes/api/admin/health'
 import { Route as ApiAdminUsersRouteImport } from './routes/api/admin/users'
@@ -108,6 +109,11 @@ const ApiScanRoute = ApiScanRouteImport.update({
 const ApiScreenerRoute = ApiScreenerRouteImport.update({
   id: '/api/screener',
   path: '/api/screener',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTradeConfigRoute = ApiTradeConfigRouteImport.update({
+  id: '/api/trade-config',
+  path: '/api/trade-config',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminConfigRoute = ApiAdminConfigRouteImport.update({
@@ -206,6 +212,7 @@ export interface FileRoutesByFullPath {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/trade-config': typeof ApiTradeConfigRoute
   '/api/admin/config': typeof ApiAdminConfigRoute
   '/api/admin/health': typeof ApiAdminHealthRoute
   '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
@@ -238,6 +245,7 @@ export interface FileRoutesByTo {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/trade-config': typeof ApiTradeConfigRoute
   '/api/admin/config': typeof ApiAdminConfigRoute
   '/api/admin/health': typeof ApiAdminHealthRoute
   '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
@@ -271,6 +279,7 @@ export interface FileRoutesById {
   '/api/risk': typeof ApiRiskRoute
   '/api/scan': typeof ApiScanRoute
   '/api/screener': typeof ApiScreenerRoute
+  '/api/trade-config': typeof ApiTradeConfigRoute
   '/api/admin/config': typeof ApiAdminConfigRoute
   '/api/admin/health': typeof ApiAdminHealthRoute
   '/api/admin/users': typeof ApiAdminUsersRouteWithChildren
@@ -305,6 +314,7 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/trade-config'
     | '/api/admin/config'
     | '/api/admin/health'
     | '/api/admin/users'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/trade-config'
     | '/api/admin/config'
     | '/api/admin/health'
     | '/api/admin/users'
@@ -369,6 +380,7 @@ export interface FileRouteTypes {
     | '/api/risk'
     | '/api/scan'
     | '/api/screener'
+    | '/api/trade-config'
     | '/api/admin/config'
     | '/api/admin/health'
     | '/api/admin/users'
@@ -402,6 +414,7 @@ export interface RootRouteChildren {
   ApiRiskRoute: typeof ApiRiskRoute
   ApiScanRoute: typeof ApiScanRoute
   ApiScreenerRoute: typeof ApiScreenerRoute
+  ApiTradeConfigRoute: typeof ApiTradeConfigRoute
   ApiAdminConfigRoute: typeof ApiAdminConfigRoute
   ApiAdminHealthRoute: typeof ApiAdminHealthRoute
   ApiAdminUsersRoute: typeof ApiAdminUsersRouteWithChildren
@@ -516,6 +529,13 @@ declare module '@tanstack/react-router' {
       path: '/api/screener'
       fullPath: '/api/screener'
       preLoaderRoute: typeof ApiScreenerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/trade-config': {
+      id: '/api/trade-config'
+      path: '/api/trade-config'
+      fullPath: '/api/trade-config'
+      preLoaderRoute: typeof ApiTradeConfigRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin/config': {
@@ -671,6 +691,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRiskRoute: ApiRiskRoute,
   ApiScanRoute: ApiScanRoute,
   ApiScreenerRoute: ApiScreenerRoute,
+  ApiTradeConfigRoute: ApiTradeConfigRoute,
   ApiAdminConfigRoute: ApiAdminConfigRoute,
   ApiAdminHealthRoute: ApiAdminHealthRoute,
   ApiAdminUsersRoute: ApiAdminUsersRouteWithChildren,

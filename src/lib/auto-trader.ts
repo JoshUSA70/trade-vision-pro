@@ -36,6 +36,7 @@ export type AutoTradeResult = {
   scanned: number; // 候選池總數
   universe: number; // 選股程式精選檔數
   qualified: number;
+  minScore: number; // 本次使用的買入門檻
   intradayNote: string | null;
   orders: AutoOrder[];
   skipped: Array<{ symbol: string; reason: string }>;
@@ -50,7 +51,7 @@ function todayTaipei(): string {
 export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTradeResult> {
   const result: AutoTradeResult = {
     success: true, trigger, scanned: 0, universe: 0, qualified: 0, orders: [], skipped: [],
-    intradayNote: null,
+    minScore: 75, intradayNote: null,
   };
   try {
     // ── b) 風控檢查 ──
@@ -80,6 +81,7 @@ export async function runAutoTrader(trigger: 'cron' | 'manual'): Promise<AutoTra
     // ── c) 讀取交易參數（管理介面可調） ──
     const tcfg = await getAppConfig();
     const MIN_SCORE = tcfg.trade_min_score;
+    result.minScore = MIN_SCORE;
     const DAILY_PREFILTER = tcfg.trade_daily_prefilter;
     const INTRADAY_TOP_N = tcfg.trade_intraday_top_n;
     const MAX_BUYS = tcfg.trade_max_buys;

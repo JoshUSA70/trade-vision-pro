@@ -34,6 +34,17 @@ export function AutoTradeCard() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [running, setRunning] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [minScore, setMinScore] = useState(75);
+  const [maxBuys, setMaxBuys] = useState(3);
+  useEffect(() => {
+    (async () => {
+      try {
+        const d = await (await fetch('/api/trade-config')).json() as { minScore?: number; maxBuys?: number };
+        if (typeof d.minScore === 'number') setMinScore(d.minScore);
+        if (typeof d.maxBuys === 'number') setMaxBuys(d.maxBuys);
+      } catch { /* 用預設值 */ }
+    })();
+  }, []);
 
   const loadHistory = useCallback(async () => {
     try {
@@ -48,13 +59,13 @@ export function AutoTradeCard() {
     setRunning(true);
     try {
       const r = await fetch('/api/cron/test');
-      const data = await r.json() as { success: boolean; orders?: Array<{ symbol: string }>; stopped?: string; error?: string; qualified?: number };
+      const data = await r.json() as { success: boolean; orders?: Array<{ symbol: string }>; stopped?: string; error?: string; qualified?: number; minScore?: number };
       if (data.stopped) toast.warning('已停止', { description: data.stopped });
       else if (data.error) toast.error('執行失敗', { description: data.error });
       else if (data.orders && data.orders.length > 0) {
         toast.success(`自動下單完成：${data.orders.map((o) => o.symbol).join(', ')}`);
       } else {
-        toast.info('執行完成：今日無符合 Score≥75 的標的');
+        toast.info(`執行完成：今日無符合 Score≥${data.minScore ?? minScore} 的標的`);
       }
       void loadHistory();
     } catch (e) {
@@ -88,7 +99,7 @@ export function AutoTradeCard() {
         <div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div><p className="text-[11px] text-muted-foreground">下次執行時間</p><p className="mt-1 text-sm font-semibold text-foreground">{nextRunText()}（開盤5分K確認後）</p></div>
-            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · 智能選股＋四因子＋盤中5分K確認</p></div>
+            <div><p className="text-[11px] text-muted-foreground">排程</p><p className="mt-1 text-sm font-semibold text-foreground">週一～週五 · 智能選股＋四因子＋盤中5分K確認 · 門檻 {minScore} 分</p></div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={() => setConfirmOpen(true)} disabled={running} className="h-8 rounded-sm text-xs font-semibold">
@@ -123,7 +134,7 @@ export function AutoTradeCard() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認手動執行</AlertDialogTitle>
             <AlertDialogDescription>
-              將立即執行一次完整流程：智能選股（約 {CANDIDATE_POOL.length} 檔候選）→ 日線四因子評分 → 盤中 5分K 確認 → 對最終分數≥75 的標的最多買入 3 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
+              將立即執行一次完整流程：智能選股（約 {CANDIDATE_POOL.length} 檔候選）→ 日線四因子評分 → 盤中 5分K 確認 → 對最終分數≥{minScore} 的標的最多買入 {maxBuys} 檔（每檔 1 股，Alpaca 模擬帳戶市價單）。確定執行嗎？
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
