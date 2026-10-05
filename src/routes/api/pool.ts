@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import poolData from '@/lib/candidate-pool.json';
 import { getSupabaseAdmin } from '@/lib/supabase';
@@ -6,7 +7,8 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 export const Route = createFileRoute('/api/pool')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         const supa = getSupabaseAdmin();
         if (supa) {

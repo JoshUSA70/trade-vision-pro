@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { runScreener, SCREENER_CONFIG } from '@/lib/screener';
 
@@ -6,7 +7,8 @@ import { runScreener, SCREENER_CONFIG } from '@/lib/screener';
 export const Route = createFileRoute('/api/screener')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         try {
           const r = await runScreener();

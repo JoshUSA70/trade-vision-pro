@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { createClient } from '@supabase/supabase-js';
 

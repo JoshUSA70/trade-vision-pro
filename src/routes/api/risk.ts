@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 
 const PAPER_BASE = 'https://paper-api.alpaca.markets';
@@ -18,7 +19,8 @@ function todayET(): string {
 export const Route = createFileRoute('/api/risk')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         try {
           const key = process.env['ALPACA_API_KEY'];

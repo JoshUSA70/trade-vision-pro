@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { supabaseStatus } from '@/lib/supabase';
 
@@ -5,7 +6,7 @@ import { supabaseStatus } from '@/lib/supabase';
 export const Route = createFileRoute('/api/supabase/status')({
   server: {
     handlers: {
-      GET: async () => Response.json({ source: 'supabase-status', ...supabaseStatus() }, { headers: { 'Cache-Control': 'no-store' } }),
+      GET: async (ctx) => Response.json({ source: 'supabase-status', ...supabaseStatus() }, { headers: { 'Cache-Control': 'no-store' } }),
     },
   },
 });

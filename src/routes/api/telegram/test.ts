@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { sendTelegram } from '@/lib/telegram';
 
@@ -5,7 +6,8 @@ import { sendTelegram } from '@/lib/telegram';
 export const Route = createFileRoute('/api/telegram/test')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         const result = await sendTelegram(
           `✅ *Trade Vision Telegram 測試*\n\n連線正常，${new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })}`,

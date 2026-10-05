@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { createClient } from '@supabase/supabase-js';
 import { getOrders, isTodayET } from '@/lib/alpaca';
@@ -6,7 +7,8 @@ import { getOrders, isTodayET } from '@/lib/alpaca';
 export const Route = createFileRoute('/api/cron/history')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         try {
           const supaUrl = process.env['SUPABASE_URL'];

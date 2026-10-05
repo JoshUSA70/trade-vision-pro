@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { runAutoTrader } from '@/lib/auto-trader';
 import { sendTelegram } from '@/lib/telegram';
@@ -6,7 +7,8 @@ import { sendTelegram } from '@/lib/telegram';
 export const Route = createFileRoute('/api/cron/test')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         try {
           const result = await runAutoTrader('manual');

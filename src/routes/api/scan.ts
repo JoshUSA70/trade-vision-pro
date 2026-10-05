@@ -1,3 +1,4 @@
+import { requireApiUser } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { scanUniverse, scoreCandidates } from '@/lib/scan-engine';
 import { runScreener } from '@/lib/screener';
@@ -8,7 +9,8 @@ import { runScreener } from '@/lib/screener';
 export const Route = createFileRoute('/api/scan')({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async (ctx) => {
+        const authed = requireApiUser(ctx.request); if (authed instanceof Response) return authed;
         const headers = { 'Cache-Control': 'no-store' };
         try {
           let signals;
